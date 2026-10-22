@@ -706,8 +706,49 @@
     </div>
   </section>
 
-  <!-- ================= SLIDE 17: POWER BI PÁGINA 1: TORRE DE CONTROL ================= -->
-  <section class="slide" data-topic="17 · Power BI: Torre de Control">
+  <!-- ================= SLIDE 17: ARQUITECTURA EN ESTRELLA (STAR SCHEMA) ================= -->
+  <section class="slide" data-topic="17 · Arquitectura en Estrella (Star Schema)">
+    <div class="slide-kicker">⭐ Power BI Desktop · Modelado Dimensional</div>
+    <h2 class="slide-title">Arquitectura en Estrella: <span class="grad-text">Motor VertiPaq & 9 Entidades</span></h2>
+    <p class="slide-subtitle">
+      Esquema dimensional en estrella (<em>Star Schema</em>) configurado bajo relaciones estrictas de <strong>uno a varios (1:N)</strong> y <strong>dirección de filtro cruzado única</strong> para garantizar máxima compresión y velocidad DAX en memoria.
+    </p>
+
+    <div class="layout-split">
+      <div class="big-image-frame" onclick="openLightbox('powerbigraficas/diagrama.png', 'Diagrama Relacional del Modelo Dimensional en Estrella (Star Schema)', 'Arquitectura dimensional en estrella de 9 entidades en Microsoft Power BI Desktop: 5 dimensiones (Dim_Calendario, Dim_Equipos, Dim_Hospital, Dim_Tecnico, Dim_Repuestos), 3 tablas de hechos transaccionales (Fact_Mantenimiento, Fact_Repuestos_Consumo, Fact_EvaluacionRiesgo) y la entidad prescriptiva Prescripcion_Acciones_Inmediatas. Relaciones estrictas 1:N y filtro unidireccional optimizadas para el motor columnar en memoria VertiPaq.')">
+        <img src="powerbigraficas/diagrama.png" alt="Diagrama del Modelo Dimensional en Estrella" class="big-image">
+        <div class="image-zoom-tag">🔍 Clic para ampliar</div>
+      </div>
+
+      <div class="analysis-panel">
+        <div class="takeaway-card primary">
+          <div class="takeaway-header">⚡ Optimización para Motor VertiPaq</div>
+          <div class="takeaway-text">
+            Erradica relaciones muchos a muchos (<em>N:M</em>) y ambigüedades en las rutas de filtrado. Las dimensiones filtran descendentemente a las tablas transaccionales, asegurando tiempos de respuesta instantáneos en las medidas DAX.
+          </div>
+        </div>
+
+        <div class="takeaway-card green">
+          <div class="takeaway-header">⭐ 9 Entidades Relacionales Estructuradas</div>
+          <div class="takeaway-text">
+            • <strong>5 Tablas Dimensionales (Dim_):</strong> Calendario (fechas), Equipos (229 activos), Hospital (17 centros), Técnico (6 ingenieros) y Repuestos (catálogo e inventario Kardex).<br>
+            • <strong>3 Tablas de Hechos (Fact_):</strong> Mantenimiento (historial operativo), Repuestos Consumo (piezas por orden) y Evaluación de Riesgo (scores SHAP).<br>
+            • <strong>1 Entidad Prescriptiva:</strong> <code>Prescripcion_Acciones_Inmediatas</code> vinculada a <code>Dim_Equipos[numero_serial]</code>.
+          </div>
+        </div>
+
+        <div class="takeaway-card red">
+          <div class="takeaway-header">🔒 Trazabilidad Transaccional 1:N Pura</div>
+          <div class="takeaway-text">
+            <code>Fact_Mantenimiento</code> filtra $1:\infty$ por <code>id_orden</code> a <code>Fact_Repuestos_Consumo</code>, permitiendo auditar con exactitud el costo de mano de obra y el desgaste de piezas reemplazadas en cada intervención.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 18: POWER BI PÁGINA 1: TORRE DE CONTROL ================= -->
+  <section class="slide" data-topic="18 · Power BI: Torre de Control">
     <div class="slide-kicker">📊 Power BI Desktop · Dashboard Ejecutivo</div>
     <h2 class="slide-title">Página 1: Torre de Control & <span class="grad-text">Semáforo Hospitalario</span></h2>
     <p class="slide-subtitle">
@@ -748,8 +789,8 @@
     </div>
   </section>
 
-  <!-- ================= SLIDE 18: POWER BI PÁGINA 2: DIAGNÓSTICO SHAP ================= -->
-  <section class="slide" data-topic="18 · Power BI: Diagnóstico Causal">
+  <!-- ================= SLIDE 19: POWER BI PÁGINA 2: DIAGNÓSTICO SHAP ================= -->
+  <section class="slide" data-topic="19 · Power BI: Diagnóstico Causal">
     <div class="slide-kicker">📊 Power BI Desktop · Ficha Técnica & Forense</div>
     <h2 class="slide-title">Página 2: Diagnóstico Causal & <span class="grad-text">Degradación SHAP</span></h2>
     <p class="slide-subtitle">
@@ -814,8 +855,8 @@
     </div>
   </section>
 
-  <!-- ================= SLIDE 19: POWER BI PÁGINA 3: CONSOLA PRESCRIPTIVA ================= -->
-  <section class="slide" data-topic="19 · Power BI: Consola Prescriptiva">
+  <!-- ================= SLIDE 20: POWER BI PÁGINA 3: CONSOLA PRESCRIPTIVA ================= -->
+  <section class="slide" data-topic="20 · Power BI: Consola Prescriptiva">
     <div class="slide-kicker">📊 Power BI Desktop · Logística & Kardex</div>
     <h2 class="slide-title">Página 3: Consola Prescriptiva, <span class="grad-text">Rutas & Kardex</span></h2>
     <p class="slide-subtitle">
@@ -898,8 +939,8 @@
     </div>
   </section>
 
-  <!-- ================= SLIDE 20: IMPACTO, ROI & MLOPS ================= -->
-  <section class="slide" data-topic="20 · Impacto, ROI & Conclusiones">
+  <!-- ================= SLIDE 21: IMPACTO, ROI & MLOPS ================= -->
+  <section class="slide" data-topic="21 · Impacto, ROI & Conclusiones">
     <div class="slide-cover">
       <div class="cover-kicker">CONCLUSIONES Y RECOMENDACIONES ESTRATÉGICAS</div>
       <h2 class="cover-title">
@@ -960,7 +1001,7 @@
     <button class="deck-nav-btn" id="btnNextSlide">Siguiente →</button>
   </div>
 
-  <div class="deck-counter-badge" id="slideCounterBadge">Slide 01 / 20</div>
+  <div class="deck-counter-badge" id="slideCounterBadge">Slide 01 / 21</div>
 
   <div class="deck-key-hints">
     Navegación: <kbd>[←]</kbd> <kbd>[→]</kbd> <kbd>[Espacio]</kbd> · Pantalla Completa: <kbd>[F]</kbd>
