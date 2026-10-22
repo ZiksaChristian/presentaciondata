@@ -42,13 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const paddedTotal = String(totalSlides).padStart(2, '0');
     if (counterBadge) counterBadge.textContent = `Slide ${paddedCurrent} / ${paddedTotal}`;
     
-    // Barra de progreso
+    // Feedback de animación en el badge de contador
+    if (counterBadge) {
+      counterBadge.classList.remove('bump');
+      void counterBadge.offsetWidth; // Forzar reflujo para reiniciar la animación
+      counterBadge.classList.add('bump');
+    }
+
+    // Barra de progreso superior
     if (progressBar) {
       const progressPct = ((currentIndex + 1) / totalSlides) * 100;
       progressBar.style.width = progressPct + '%';
     }
     
-    // Estados de botones
+    // Estados de botones de navegación
     if (btnPrev) btnPrev.disabled = currentIndex === 0;
     if (btnNext) btnNext.disabled = currentIndex === totalSlides - 1;
 
@@ -60,8 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnNext) btnNext.addEventListener('click', () => updateSlide(currentIndex + 1));
 
   /* ==========================================================================
-     2. NAVEGACIÓN POR TECLADO
+     2. NAVEGACIÓN POR TECLADO CON FEEDBACK VISUAL
      ========================================================================== */
+  function flashButton(btn) {
+    if (!btn || btn.disabled) return;
+    btn.style.transform = 'scale(0.94)';
+    setTimeout(() => { btn.style.transform = ''; }, 140);
+  }
+
   window.addEventListener('keydown', (e) => {
     // Si el modal lightbox está abierto
     if (lightboxModal && lightboxModal.classList.contains('active')) {
@@ -71,9 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
       e.preventDefault();
+      flashButton(btnNext);
       updateSlide(currentIndex + 1);
     } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
       e.preventDefault();
+      flashButton(btnPrev);
       updateSlide(currentIndex - 1);
     } else if (e.key === 'Home') {
       e.preventDefault();
@@ -87,7 +102,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ==========================================================================
-     3. PANTALLA COMPLETA
+     3. SOPORTE TÁCTIL (SWIPE GESTURES)
+     ========================================================================== */
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  window.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  window.addEventListener('touchend', (e) => {
+    if (lightboxModal && lightboxModal.classList.contains('active')) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    // Desplazamiento horizontal dominante y mayor a 45px
+    if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX < 0) {
+        updateSlide(currentIndex + 1); // Deslizar hacia la izquierda = Siguiente
+      } else {
+        updateSlide(currentIndex - 1); // Deslizar hacia la derecha = Anterior
+      }
+    }
+  }, { passive: true });
+
+  /* ==========================================================================
+     4. PANTALLA COMPLETA
      ========================================================================== */
   const btnFullscreen = document.getElementById('btnFullscreen');
 
@@ -104,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnFullscreen) btnFullscreen.addEventListener('click', toggleFullscreen);
 
   /* ==========================================================================
-     4. CONMUTADOR DE TEMA CLARO / OSCURO
+     5. CONMUTADOR DE TEMA CLARO / OSCURO
      ========================================================================== */
   const btnThemeToggle = document.getElementById('btnThemeToggle');
   const themeIcon = document.getElementById('themeIcon');
@@ -127,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================================
-     5. VISOR MODAL LIGHTBOX PARA AMPLIAR IMÁGENES
+     6. VISOR MODAL LIGHTBOX PARA AMPLIAR IMÁGENES
      ========================================================================== */
   const lightboxModal = document.getElementById('lightboxModal');
   const lightboxImg = document.getElementById('lightboxImg');
@@ -141,16 +184,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lightboxTitle) lightboxTitle.textContent = title;
     if (lightboxDesc) lightboxDesc.textContent = desc;
     lightboxModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
   };
 
   function closeLightbox() {
-    if (lightboxModal) lightboxModal.classList.remove('active');
+    if (lightboxModal) {
+      lightboxModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
   }
 
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
   if (lightboxModal) {
     lightboxModal.addEventListener('click', (e) => {
-      if (e.target === lightboxModal) closeLightbox();
+      if (e.target === lightboxModal || e.target.classList.contains('lightbox-backdrop')) {
+        closeLightbox();
+      }
     });
   }
 
