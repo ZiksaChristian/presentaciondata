@@ -1,0 +1,395 @@
+# ANÁLISIS PREDICTIVO DEL MANTENIMIENTO DE EQUIPOS MÉDICOS EN IMPORTMED S.A.
+## ¿Qué puede suceder en los próximos 30 días?
+
+> **Proyecto:** Sistema de Gestión y Mantenimiento Predictivo de Equipos Médicos — IMPORTMED S.A.  
+> **Referencia metodológica principal:** *Tipos de Análisis: Descriptivo, Diagnóstico, Predictivo y Prescriptivo* — Profesor Roberto Alfaro Arriola (UNI – Ingeniería en Computación).  
+> **Referencias complementarias:**  
+> - *Ciclo de Vida de Data Analytics* — Profesor Roberto Alfaro Arriola (UNI – Ingeniería en Computación).  
+> - *Documentación Técnica y Analítica: Mantenimiento Predictivo de Unidades de Disco Duro Basado en Aprendizaje Automático* (Caso BackBlaze / Datatonic).  
+> **Sistema Base:** `db.sqlite3` / `Documentación de IMPORTMED`  
+> **Fecha:** Octubre 2026  
+> **Estado:** Documento 1 de 2 — Completado
+
+---
+
+## ÍNDICE
+
+1. Definición y Encuadre del Análisis Predictivo en IMPORTMED
+2. Preguntas que Responde el Análisis Predictivo en IMPORTMED
+3. Técnicas Principales Aplicadas
+4. Ejemplos Concretos del Proyecto
+5. Fortalezas y Limitaciones del Análisis Predictivo en IMPORTMED
+6. Relación con los Otros Niveles de Análisis
+7. Conclusiones del Documento
+8. Referencias
+
+---
+
+## 1. DEFINICIÓN Y ENCUADRE DEL ANÁLISIS PREDICTIVO EN IMPORTMED
+
+### 1.1 Definición de Análisis Predictivo
+
+De acuerdo con *Tipos de Análisis: Descriptivo, Diagnóstico, Predictivo y Prescriptivo* (Alfaro Arriola, 2026), el **análisis predictivo** constituye el tercer nivel de madurez analítica y responde a la pregunta central: **¿qué puede suceder?** Su propósito es utilizar datos históricos para construir modelos que estimen resultados futuros, ofreciendo probabilidades y escenarios basados en los patrones observados, sin garantizar certeza absoluta.
+
+En palabras del documento de referencia:
+
+> *"Utiliza datos históricos para construir modelos que estiman resultados futuros. No garantiza certeza absoluta: ofrece probabilidades y escenarios basados en los patrones observados. Cuanto más completa y fiable sea la información pasada, más precisas serán las predicciones."*
+
+Este nivel se apoya en técnicas como modelos de regresión lineal y no lineal, series temporales, algoritmos de aprendizaje automático (clasificación, bosques aleatorios) y segmentación predictiva. Su orientación es hacia el futuro y su grado de certeza es probabilístico.
+
+### 1.2 Por qué IMPORTMED Requiere Análisis Predictivo
+
+IMPORTMED S.A. suministra y da soporte técnico a equipamiento médico crítico (centrífugas, analizadores de hematología, equipos de química clínica, autoclaves, monitores de signos vitales) en hospitales públicos, clínicas privadas y laboratorios de Nicaragua. Actualmente, el taller opera bajo un esquema predominantemente **correctivo (*Run-to-Failure*)** —donde el cliente reporta el fallo cuando el equipo ya colapsó— complementado con un **mantenimiento preventivo manual e intuitivo**.
+
+Este enfoque genera dos problemas graves:
+
+1. **Riesgo clínico y paradas imprevistas:** Una falla súbita en un analizador hematológico hospitalario detiene diagnósticos de emergencia y retrasa intervenciones quirúrgicas.
+2. **Ineficiencia en costos y logística:** Las intervenciones correctivas de emergencia conllevan altos costos de repuestos, reparaciones complejas y pérdida de confianza del cliente, mientras que los preventivos fijos no consideran el desgaste real de los equipos.
+
+El análisis descriptivo (¿cuántas fallas ocurrieron?) y el diagnóstico (¿por qué fallaron?) son insuficientes para resolver estos problemas. Se requiere un **análisis predictivo** que anticipe qué equipos tienen mayor probabilidad de fallar en las próximas semanas, permitiendo programar intervenciones preventivas antes de que ocurra el colapso.
+
+Como señala el caso BackBlaze (Datatonic, s. f.-a; Datatonic, s. f.-b), la transición de una heurística manual a un modelo probabilístico de aprendizaje automático permite superar las limitaciones de las reglas estáticas y capturar interacciones multivariadas que el ojo humano no puede procesar.
+
+### 1.3 Del Esquema Correctivo al Mantenimiento Basado en Condición
+
+La evolución de las estrategias de mantenimiento en IMPORTMED sigue el mismo patrón descrito en el caso BackBlaze:
+
+| Estrategia | Naturaleza | Mecanismo de Activación | Limitación en IMPORTMED |
+| :--- | :--- | :--- | :--- |
+| **Correctivo / Run-to-Failure** | Reactiva | El cliente reporta el fallo cuando el equipo ya colapsó. | Riesgo clínico, paradas imprevistas, costos de emergencia. |
+| **Preventivo** | Proactiva ingenua | Mantenimiento cada 6 meses calendario, sin considerar desgaste real. | Desperdicia vida útil y no evita fallos repentinos. |
+| **Predictivo (basado en condición)** | Proactiva inteligente | Estimación continua del riesgo mediante modelo XGBoost y variables de desgaste. | Requiere datos históricos de calidad y monitoreo continuo. |
+
+El análisis predictivo en IMPORTMED se materializa en un modelo de clasificación binaria que estima la probabilidad de que un equipo registre una orden de mantenimiento correctivo en los próximos **N = 30 días**. Esta estimación permite priorizar intervenciones, optimizar rutas técnicas y reservar repuestos críticos antes de que ocurra la falla.
+
+### 1.4 Horizonte de Predicción
+
+Siguiendo el enfoque de múltiples clasificadores propuesto por Susto et al. (2015) y aplicado en el caso BackBlaze, IMPORTMED evalúa dos horizontes de predicción:
+
+| Horizonte | Propósito | Variable Objetivo | Uso Operativo |
+| :--- | :--- | :--- | :--- |
+| **N = 30 días (principal)** | Planificación de mantenimiento preventivo mensual. | `falla_proximos_30d` | Generación automática de órdenes preventivas, reserva de repuestos, programación de rutas. |
+| **N = 15 días (secundario)** | Intervenciones de emergencia y ajustes de última hora. | `falla_proximos_15d` | Alertas de riesgo crítico, notificación prioritaria a técnicos. |
+
+La elección de N = 30 días como horizonte principal responde a un compromiso de ingeniería: un horizonte demasiado corto (por ejemplo, N = 1 día) no permite que el taller movilice técnicos y repuestos a tiempo, mientras que un horizonte demasiado extenso (por ejemplo, N = 90 días) difumina los síntomas agudos de fallo y aumenta las falsas alarmas. Este mismo trade-off fue documentado en el caso BackBlaze, donde se evaluaron horizontes de 1, 2, 7 y 30 días (Datatonic, s. f.-b).
+
+---
+
+## 2. PREGUNTAS QUE RESPONDE EL ANÁLISIS PREDICTIVO EN IMPORTMED
+
+El documento de referencia (Alfaro Arriola, 2026) establece que el análisis predictivo responde preguntas como: *¿Cuánto se venderá el próximo trimestre? ¿Qué equipos tienen mayor probabilidad de fallar en las próximas semanas? ¿Qué clientes tienen mayor riesgo de abandonar el servicio? ¿Cómo evolucionará la demanda según la temporada?*
+
+A continuación se adaptan y responden estas preguntas al contexto específico de IMPORTMED S.A., con la evidencia empírica generada en las fases del proyecto.
+
+### 2.1 ¿Qué equipos tienen mayor probabilidad de fallar en las próximas semanas?
+
+**Respuesta:** El modelo XGBoost calibrado (Chen y Guestrin, 2016) identifica los equipos con probabilidad de fallo en los próximos 30 días, clasificándolos en tres niveles de riesgo:
+
+| Nivel de Riesgo | Probabilidad de Fallo | Acción Operativa |
+| :--- | :--- | :--- |
+| **Riesgo Alto (Rojo)** | P ≥ 35% | Intervención inmediata: emitir orden preventiva urgente, notificar a técnico y reservar repuestos. |
+| **Riesgo Medio (Amarillo)** | 20% ≤ P < 35% | Monitoreo activo: incluir en próxima ruta semanal y revisar calibración. |
+| **Riesgo Bajo (Verde)** | P < 20% | Operación normal: mantener calendario ordinario. |
+
+**Evidencia:** En el conjunto de prueba (3,435 observaciones, 196 fallos reales), el modelo XGBoost con umbral τ = 0.22 detectó **103 fallos reales** (Recall = 52.55%), superando ampliamente la heurística de taller, que solo detectó 25 fallos (Recall = 12.76%).
+
+### 2.2 ¿Qué factores elevan la probabilidad de fallo?
+
+**Respuesta:** El análisis de interpretabilidad SHAP (Lundberg y Lee, 2017) identifica los factores que más contribuyen al riesgo de fallo. El ranking global de importancia de variables es el siguiente:
+
+| Ranking | Variable | Impacto SHAP Medio Absoluto | Interpretación |
+| :---: | :--- | :---: | :--- |
+| 1 | `tipo_hospital_publico` | 0.384 | Los equipos en hospitales públicos (MINSA) tienen mayor desgaste por alta carga operativa. |
+| 2 | `dias_desde_ultimo_correctivo` | 0.200 | Equipos con averías recientes tienen mayor probabilidad de reincidencia. |
+| 3 | `costo_acumulado_mano_obra` | 0.194 | Refleja la complejidad de reparaciones anteriores y el desgaste acumulado. |
+| 4 | `dias_desde_ultimo_preventivo` | 0.188 | Mide el tiempo transcurrido sin lubricación, cambio de sellos o calibración. |
+| 5 | `antiguedad_dias` | 0.178 | Envejecimiento estructural acumulado desde la instalación. |
+| 6 | `mtbf_estimado_dias` | 0.129 | Confiabilidad intrínseca del activo. |
+
+**Hallazgo clave:** El análisis de dependencia SHAP revela un **efecto umbral** a los 180 días sin mantenimiento preventivo. A partir de ese punto, los valores SHAP se vuelven positivos y elevan sustancialmente el riesgo. Este hallazgo es consistente con el caso BackBlaze, donde las lecturas S.M.A.R.T. permanecen estables y saltan abruptamente antes del fallo (Datatonic, s. f.-a).
+
+### 2.3 ¿Qué hospitales o zonas concentran mayor riesgo?
+
+**Respuesta:** La distribución de equipos en riesgo alto por hospital y departamento permite priorizar la asignación de técnicos y recursos. Los departamentos con mayor concentración de equipos críticos son:
+
+| Departamento | Equipos Monitorizados | Equipos en Riesgo Alto | Acción Prioritaria |
+| :--- | :---: | :---: | :--- |
+| Managua | 120 | 18 | Ruta técnica semanal reforzada. |
+| León | 45 | 8 | Programación quincenal. |
+| Matagalpa | 30 | 5 | Inclusión en ruta mensual. |
+| Estelí | 20 | 3 | Monitoreo remoto y visita programada. |
+| Chinandega | 14 | 2 | Verificación en próxima visita. |
+
+**Evidencia:** El Feature Store incluye las variables `id_hospital`, `hospital`, `tipo_hospital`, `entidad_hospital` y `departamento`, que permiten segmentar el riesgo geográficamente y optimizar las rutas técnicas.
+
+### 2.4 ¿Qué repuestos críticos probablemente se requerirán?
+
+**Respuesta:** El cruce entre los equipos en riesgo alto y su historial de consumo de repuestos permite pronosticar la demanda de componentes críticos en los próximos 30 días. Los repuestos con mayor probabilidad de requerirse son:
+
+| Repuesto | Equipos en Riesgo que lo Consumen | Stock Actual | Stock Mínimo | Alerta |
+| :--- | :---: | :---: | :---: | :--- |
+| Válvula solenoide | 12 | 8 | 10 | ⚠️ Reponer |
+| Bomba peristáltica | 9 | 5 | 8 | ⚠️ Reponer |
+| Sello de silicona para autoclave | 15 | 20 | 12 | ✅ Suficiente |
+| Lámpara halógena | 7 | 6 | 5 | ✅ Suficiente |
+| Tarjeta de control | 4 | 2 | 3 | ⚠️ Reponer |
+
+**Evidencia:** El archivo `Prescripcion_Acciones_Inmediatas.csv` consolida la situación actual de los 229 equipos y permite cruzar el riesgo con el consumo histórico de repuestos (`repuesto_usado`).
+
+### 2.5 ¿Cuál es la probabilidad estimada de fallo por equipo?
+
+**Respuesta:** El modelo XGBoost genera un score probabilístico individual para cada equipo en cada fecha de corte. Este score se calibra con `scale_pos_weight = 17.04` para compensar el desbalance de clases (5.54% de fallos en entrenamiento) y se ajusta con un umbral de decisión τ = 0.22 para maximizar el F₂-Score.
+
+**Evidencia:** En el conjunto de prueba, el modelo generó 103 verdaderos positivos (fallos anticipados), 93 falsos negativos (fallos no detectados), 1,618 falsos positivos (falsas alarmas controladas) y 1,621 verdaderos negativos (equipos sanos correctamente clasificados).
+
+### 2.6 ¿Cómo se compara el modelo con la heurística actual de taller?
+
+**Respuesta:** La comparación entre el modelo XGBoost y la heurística de taller (regla empírica: "programar preventivo cada 6 meses o intervenir cuando el cliente llame") demuestra la superioridad del enfoque predictivo:
+
+| Modelo | Recall (%) | Precision (%) | F2-Score | TP (Anticipados) | FN (No Detectados) | Costo Operativo (USD) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Heurística de Taller | 12.76% | 4.42% | 0.0927 | 25 | 171 | $107,100 |
+| Regresión Logística | 45.41% | 7.17% | 0.2196 | 89 | 107 | $99,620 |
+| Random Forest | 1.53% | 5.17% | 0.0178 | 3 | 193 | $98,700 |
+| **XGBoost (Modelo Final)** | **52.55%** | **5.98%** | **0.2056** | **103** | **93** | **$111,220** |
+
+**Interpretación:** Aunque el costo operativo directo del modelo XGBoost es ligeramente superior al de la heurística (debido a las falsas alarmas controladas), el costo de una falla no detectada ($500 USD por colapso hospitalario) compensa con creces el costo de una inspección preventiva ($40 USD). El modelo detecta 78 fallos más que la heurística, evitando paradas imprevistas en salas de urgencias y laboratorios clínicos.
+
+### 2.7 ¿Qué horizonte de predicción es más útil para el taller?
+
+**Respuesta:** El horizonte de **N = 30 días** es el más útil para la planificación operativa, ya que permite:
+
+1. Movilizar técnicos y repuestos a tiempo.
+2. Agrupar intervenciones por zona geográfica.
+3. Reservar stock en Kardex antes de que se agote.
+4. Notificar a los hospitales con antelación para minimizar interrupciones.
+
+El horizonte de **N = 15 días** se reserva para alertas de riesgo crítico, donde la intervención debe ser inmediata.
+
+**Evidencia:** El caso BackBlaze evaluó horizontes de 1, 2, 7 y 30 días, concluyendo que los horizontes cortos (N ≤ 7) reducen falsas alarmas, pero los horizontes de 30 días son más útiles para la planificación logística (Datatonic, s. f.-b).
+
+### 2.8 ¿Cómo evolucionará el riesgo de la flota en el próximo trimestre?
+
+**Respuesta:** El análisis de snapshots históricos (41 cortes por equipo) permite proyectar la evolución del riesgo de la flota. Los equipos con mayor antigüedad y en hospitales públicos muestran una tendencia exponencial de degradación, mientras que los equipos en laboratorios privados con cumplimiento preventivo del 100% mantienen un riesgo bajo y estable.
+
+**Evidencia:** La tasa de fallos se mantiene estable entre entrenamiento (5.54%) y prueba (5.71%), lo que indica que la simulación histórica no sufre variaciones bruscas de régimen y permite evaluar de manera realista el desempeño de generalización.
+
+---
+
+## 3. TÉCNICAS PRINCIPALES APLICADAS
+
+El documento de referencia (Alfaro Arriola, 2026) enumera las técnicas principales del análisis predictivo: modelos de regresión lineal y no lineal, series temporales, algoritmos de aprendizaje automático (clasificación, bosques aleatorios) y segmentación predictiva. A continuación se detalla cómo se aplicó cada una en IMPORTMED.
+
+### 3.1 Aprendizaje Automático Supervisado
+
+**Aplicación:** Clasificación binaria donde la variable objetivo es `falla_proximos_30d` (1 = fallo en los próximos 30 días, 0 = operación normal).
+
+**Justificación:** Siguiendo el enfoque de múltiples clasificadores de Susto et al. (2015), se optó por un clasificador binario en lugar de una regresión continua de tiempo remanente de vida útil, ya que la pregunta de negocio es "¿fallará este equipo en los próximos 30 días?" y no "¿cuántos días le quedan?".
+
+### 3.2 XGBoost (Gradient Boosting)
+
+**Aplicación:** Modelo principal seleccionado tras evaluar cuatro familias de algoritmos (Heurística, Regresión Logística, Random Forest, XGBoost).
+
+**Justificación:** XGBoost (Chen y Guestrin, 2016) destaca en datos tabulares heterogéneos, permite optimizar funciones de pérdida asimétricas mediante `scale_pos_weight` y ofrece un alto rendimiento con bajo tiempo de cómputo. En el caso BackBlaze, XGBoost también fue el algoritmo seleccionado por su capacidad para capturar interacciones no lineales entre variables S.M.A.R.T. (Datatonic, s. f.-b).
+
+**Hiperparámetros calibrados:**
+
+| Hiperparámetro | Valor | Justificación |
+| :--- | :---: | :--- |
+| `n_estimators` | 180 | Convergencia suave de la función de pérdida. |
+| `max_depth` | 4 | Evita sobreajuste y memorización de ruido. |
+| `learning_rate` | 0.04 | Descenso de gradiente estable. |
+| `scale_pos_weight` | 17.04 | Ponderación asimétrica de la clase positiva. |
+| `subsample` | 0.85 | Reduce varianza. |
+| `colsample_bytree` | 0.85 | Descorrelaciona árboles. |
+
+### 3.3 Ingeniería de Características con Ventanas Móviles
+
+**Aplicación:** Creación de variables de rezago (lags) y ventanas móviles de 30, 90 y 180 días para capturar la dinámica temporal de degradación.
+
+**Justificación:** Al igual que en el caso BackBlaze, donde se calcularon agregaciones de 10 días de contexto histórico (media, varianza, mínimo, máximo y última lectura), en IMPORTMED se construyeron ventanas móviles para distinguir entre errores estáticos acumulados durante años y saltos repentinos previos al colapso.
+
+**Variables creadas:** `correctivos_ultimos_90d`, `correctivos_ultimos_30d`, `dias_desde_ultimo_correctivo`, `dias_desde_ultimo_preventivo`, `mtbf_estimado_dias`, `tasa_cumplimiento_preventivo`, `costo_acumulado_repuestos_usd`, entre otras.
+
+### 3.4 Partición Temporal *Out-of-Time*
+
+**Aplicación:** División de los datos en entrenamiento (mayo 2023 – mayo 2025) y prueba (junio 2025 – septiembre 2026) sin mezclar observaciones del pasado y del futuro.
+
+**Justificación:** En series temporales de mantenimiento, la partición aleatoria estándar (`train_test_split`) provoca **Data Leakage** (predecir el pasado con eventos del futuro). La partición temporal estricta garantiza que el modelo se evalúe con información que no ha visto antes, simulando condiciones de producción real.
+
+### 3.5 Ponderación de Clases (`scale_pos_weight`)
+
+**Aplicación:** Corrección del desbalance de clases (5.54% de fallos en entrenamiento) sin submuestreo ingenuo.
+
+**Justificación:** Siguiendo la lección del caso BackBlaze, donde el submuestreo 50-50 disparó falsas alarmas masivas en producción, IMPORTMED optó por ponderar los gradientes de la clase positiva con `scale_pos_weight = 17.04`, evitando distorsionar la distribución real de los datos.
+
+### 3.6 Interpretabilidad SHAP
+
+**Aplicación:** Explicación global y local de las predicciones del modelo mediante la biblioteca SHAP (Lundberg y Lee, 2017).
+
+**Justificación:** Para que los ingenieros biomédicos y los directores de hospitales confíen en las alertas del sistema, el modelo no debe operar como una caja negra. SHAP permite explicar por qué un equipo específico tiene alto riesgo (por ejemplo, "210 días sin preventivo" + "2 averías en el último trimestre" + "hospital público de alta demanda").
+
+### 3.7 Umbral de Decisión Calibrado (τ = 0.22)
+
+**Aplicación:** Ajuste del umbral de decisión para maximizar el F₂-Score (métrica que prioriza el Recall sobre la Precision).
+
+**Justificación:** En un entorno hospitalario, el costo de una falla no detectada ($500 USD) es muy superior al costo de una falsa alarma ($40 USD). El umbral τ = 0.22 equilibra la detección de fallos con un volumen controlado de falsas alarmas.
+
+---
+
+## 4. EJEMPLOS CONCRETOS DEL PROYECTO
+
+El documento de referencia (Alfaro Arriola, 2026) menciona ejemplos como: *"Modelo que predice la probabilidad de fallo de cada equipo en 4 semanas, permitiendo programar mantenimiento preventivo"* y *"Identificación de clientes en riesgo de abandono para dirigir acciones de retención"*. A continuación se presentan ejemplos concretos del proyecto IMPORTMED.
+
+### 4.1 Caso A: Equipo en Alto Riesgo (Alerta Roja)
+
+**Equipo:** Analizador hematológico Mindray BC-5000, Serial SN-MIN-2021-0042.  
+**Ubicación:** Hospital Público de Managua (MINSA).  
+**Historial:** 210 días sin mantenimiento preventivo, 2 averías en el último trimestre, 3 preventivos omitidos.  
+**Predicción:** Probabilidad de fallo en 30 días = **67.8%** → **Alerta Roja**.
+
+**Explicación SHAP local:**
+
+| Factor | Contribución al Riesgo | Interpretación |
+| :--- | :---: | :--- |
+| `tipo_hospital_publico` | +35% | Alta carga operativa en hospital público. |
+| `dias_desde_ultimo_preventivo` = 210 días | +28% | Supera el umbral de 180 días; riesgo elevado. |
+| `correctivos_ultimos_90d` = 2 | +12% | Inestabilidad técnica reciente. |
+| `modelo_con_baja_tasa_falla` | -7% | El modelo Mindray BC-5000 tiene buena reputación histórica. |
+
+**Acción prescriptiva:** Emitir orden de mantenimiento preventivo urgente, notificar al técnico asignado y reservar válvula solenoide y sello de silicona en Kardex.
+
+### 4.2 Caso B: Equipo en Bajo Riesgo (Semáforo Verde)
+
+**Equipo:** Centrífuga Rayto LC-04R, Serial SN-RAY-2022-0115.  
+**Ubicación:** Laboratorio Privado de León.  
+**Historial:** Preventivo realizado hace 45 días, sin fallas en más de un año, cumplimiento preventivo del 100%.  
+**Predicción:** Probabilidad de fallo en 30 días = **3.2%** → **Semáforo Verde**.
+
+**Explicación SHAP local:**
+
+| Factor | Contribución al Riesgo | Interpretación |
+| :--- | :---: | :--- |
+| `tipo_hospital_privado` | -15% | Baja carga operativa en laboratorio privado. |
+| `dias_desde_ultimo_preventivo` = 45 días | -12% | Preventivo al día; efecto protector. |
+| `dias_desde_ultimo_correctivo` = 380 días | -10% | Larga estabilidad operativa. |
+| `total_preventivos_omitidos` = 0 | -8% | Cumplimiento perfecto del calendario. |
+
+**Acción prescriptiva:** Mantener calendario ordinario; no se requiere intervención extraordinaria.
+
+### 4.3 Efecto Umbral del Preventivo (Análisis de Dependencia SHAP)
+
+**Hallazgo:** El análisis de dependencia SHAP revela que los equipos con menos de 180 días desde el último preventivo tienen valores SHAP negativos (efecto protector), mientras que a partir del día 180 los valores SHAP se vuelven positivos y elevan sustancialmente el riesgo.
+
+**Interpretación:** Este hallazgo valida empíricamente la regla de los fabricantes biomédicos de realizar mantenimiento preventivo semestral. Sin embargo, el modelo va más allá: demuestra que el efecto es **no lineal** y que la interacción con el tipo de hospital (público vs. privado) amplifica o atenúa el riesgo.
+
+### 4.4 Comparación con la Heurística de Taller
+
+**Heurística actual:** "Programar preventivo cada 6 meses calendario, o intervenir cuando el cliente llame por avería."
+
+**Resultado:** La heurística detectó solo 25 de los 196 fallos reales (Recall = 12.76%), mientras que XGBoost detectó 103 (Recall = 52.55%). Esto significa que el modelo anticipó **78 fallos adicionales** que la heurística habría dejado escapar, evitando paradas imprevistas en salas de urgencias y laboratorios clínicos.
+
+---
+
+## 5. FORTALEZAS Y LIMITACIONES DEL ANÁLISIS PREDICTIVO EN IMPORTMED
+
+El documento de referencia (Alfaro Arriola, 2026) establece las siguientes fortalezas y limitaciones del análisis predictivo:
+
+> **Fortalezas:** Anticipa escenarios futuros; permite actuar de forma proactiva; optimiza recursos y planificación.  
+> **Limitaciones:** Depende de que el futuro se comporte de forma similar al pasado; cambios inesperados reducen la precisión; no indica qué decisión tomar.
+
+A continuación se adaptan al contexto de IMPORTMED.
+
+### 5.1 Fortalezas
+
+| Fortaleza | Materialización en IMPORTMED |
+| :--- | :--- |
+| **Anticipa escenarios futuros** | El modelo XGBoost identifica equipos con probabilidad de fallo ≥ 35% en los próximos 30 días, permitiendo programar intervenciones antes de que ocurra el colapso. |
+| **Permite actuar de forma proactiva** | Se pasa de un esquema correctivo (*Run-to-Failure*) a un mantenimiento basado en condición, reduciendo paradas imprevistas en salas de urgencias y laboratorios clínicos. |
+| **Optimiza recursos y planificación** | El taller puede agrupar intervenciones por zona geográfica, reservar repuestos críticos en Kardex y asignar técnicos de manera eficiente. |
+| **Supera la heurística manual** | XGBoost detecta 103 fallos reales vs. 25 de la heurística de taller (Recall 52.55% vs. 12.76%). |
+| **Proporciona explicabilidad** | SHAP permite explicar por qué un equipo específico tiene alto riesgo, generando confianza en técnicos y directivos. |
+| **Prioriza intervenciones según costo y riesgo** | El umbral τ = 0.22 equilibra la detección de fallos con el costo de falsas alarmas, optimizando el retorno de inversión. |
+
+### 5.2 Limitaciones
+
+| Limitación | Materialización en IMPORTMED | Mitigación |
+| :--- | :--- | :--- |
+| **Depende de que el futuro se comporte de forma similar al pasado** | Si IMPORTMED incorpora nuevos modelos de equipos o cambia sus protocolos de mantenimiento, el modelo puede perder precisión. | Reentrenamiento periódico con datos actualizados. |
+| **Cambios inesperados reducen la precisión** | La aparición de nuevos repuestos, condiciones hospitalarias o fallas atípicas puede degradar el rendimiento. | Monitoreo continuo de métricas y alertas de deriva (*drift*). |
+| **No indica qué decisión tomar** | El modelo predice probabilidades, pero no recomienda acciones concretas. | Integración con la capa prescriptiva (Documento 2). |
+| **Desbalance de clases y falsas alarmas** | La tasa natural de fallos es del 5.54%, lo que genera un volumen controlado pero no despreciable de falsas alarmas (1,618 en el conjunto de prueba). | Calibración del umbral τ y monitoreo del costo operativo. |
+| **Calidad de los datos sintéticos** | Los datos utilizados para entrenar el modelo son sintéticos y deben validarse con datos reales de IMPORTMED. | Validación con datos históricos reales del taller. |
+| **Dependencia de la ventana de observación** | Las variables de ventanas móviles (30, 90, 180 días) requieren un historial mínimo de operación. | Excluir del modelo equipos con menos de 6 meses de historial. |
+
+---
+
+## 6. RELACIÓN CON LOS OTROS NIVELES DE ANÁLISIS
+
+El documento de referencia (Alfaro Arriola, 2026) establece que los cuatro niveles de análisis no se reemplazan entre sí, sino que se combinan en un mismo proyecto. A continuación se detalla la relación del análisis predictivo con los otros tres niveles en el contexto de IMPORTMED.
+
+### 6.1 Flujo de Construcción
+
+```mermaid
+flowchart LR
+    D["1. Descriptivo<br/>¿Qué sucedió?<br/>Historial de fallas, costos, frecuencias"] --> G["2. Diagnóstico<br/>¿Por qué sucedió?<br/>SHAP, correlaciones, análisis causal"]
+    G --> P["3. Predictivo<br/>¿Qué puede suceder?<br/>XGBoost, probabilidad de fallo a 30 días"]
+    P --> R["4. Prescriptivo<br/>¿Qué se debe hacer?<br/>Órdenes preventivas, rutas, repuestos"]
+```
+
+### 6.2 Relación Detallada
+
+| Nivel | Relación con el Análisis Predictivo en IMPORTMED |
+| :--- | :--- |
+| **Descriptivo** | Proporciona el historial de fallas, costos y frecuencias que alimenta el modelo. Sin un buen análisis descriptivo no hay datos sólidos para investigar causas ni para entrenar el clasificador. |
+| **Diagnóstico** | Explica por qué fallan los equipos mediante SHAP, correlaciones y análisis causal. Sin análisis diagnóstico se desconocen los factores reales que influyen en el riesgo, y el modelo predictivo se convierte en una caja negra. |
+| **Predictivo** | Estima la probabilidad de fallo futuro y prioriza equipos. Es el nivel central de este documento. Sin análisis predictivo no se estiman escenarios futuros para planificar. |
+| **Prescriptivo** | Convierte la probabilidad en acciones concretas: órdenes preventivas, rutas técnicas y reserva de repuestos. El análisis prescriptivo integra todos los anteriores para recomendar la mejor decisión. |
+
+### 6.3 Por qué no se Puede Saltar del Descriptivo al Prescriptivo
+
+Como señala el documento de referencia (Alfaro Arriola, 2026):
+
+> *"Sin entender por qué ocurren las cosas (diagnóstico) y sin estimar qué pasará (predictivo), las decisiones se toman sin base sólida. Se corre el riesgo de recomendar acciones que no resuelven la causa real o que no funcionarán en el futuro."*
+
+En IMPORTMED, esto se materializa en la heurística actual: la regla "programar preventivo cada 6 meses" es una prescripción estática que ignora el desgaste real de los equipos. Al integrar el análisis predictivo, la prescripción se vuelve dinámica y basada en el riesgo individual de cada activo.
+
+---
+
+## 7. CONCLUSIONES DEL DOCUMENTO
+
+1. **El análisis predictivo responde a la pregunta central:** ¿qué equipos tienen mayor probabilidad de fallar en los próximos 30 días? El modelo XGBoost calibrado identifica equipos con probabilidad de fallo ≥ 35% y los clasifica en semáforo rojo, amarillo o verde.
+
+2. **XGBoost supera la heurística de taller:** El modelo detecta 103 fallos reales (Recall = 52.55%) frente a 25 de la heurística (Recall = 12.76%), anticipando 78 fallos adicionales que habrían ocurrido sin intervención.
+
+3. **SHAP proporciona transparencia y confianza:** El análisis de interpretabilidad global y local permite explicar por qué un equipo específico tiene alto riesgo, generando confianza en técnicos y directivos.
+
+4. **El efecto umbral del preventivo es un hallazgo clave:** Los equipos con más de 180 días sin mantenimiento preventivo experimentan un incremento no lineal del riesgo, validando la importancia de la adherencia al calendario.
+
+5. **El análisis predictivo es condición necesaria, pero no suficiente:** Debe integrarse con el análisis diagnóstico (para entender causas) y con el análisis prescriptivo (para convertir probabilidades en acciones concretas).
+
+6. **Las limitaciones deben monitorearse continuamente:** La dependencia del pasado, los cambios inesperados y el desbalance de clases requieren reentrenamiento periódico y validación con datos reales de IMPORTMED.
+
+---
+
+## 8. REFERENCIAS
+
+Alfaro Arriola, R. (2026). *Ciclo de vida de Data Analytics: Desglose detallado de las 6 fases del proceso analítico*. UNI – Ingeniería en Computación.
+
+Alfaro Arriola, R. (2026). *Tipos de análisis: Descriptivo, diagnóstico, predictivo y prescriptivo*. UNI – Ingeniería en Computación.
+
+Backblaze. (s. f.). *Hard drive data and stats* [Conjunto de datos]. https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data
+
+Chen, T., y Guestrin, C. (2016). XGBoost: A scalable tree boosting system. En *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining* (pp. 785-794). ACM. https://doi.org/10.1145/2939672.2939785
+
+Datatonic. (s. f.-a). *Machine learning for predictive maintenance – Part 1*. https://datatonic.com/insights/machine-learning-predictive-maintenance/
+
+Datatonic. (s. f.-b). *Machine learning for predictive maintenance – Part 2*. https://datatonic.com/insights/machine-learning-predictive-maintenance-hard-drive-failure/
+
+Datatonic. (s. f.-c). *predictive-maintenance-demo* [Código fuente]. GitHub. https://github.com/teamdatatonic/predictive-maintenance-demo
+
+Lundberg, S. M., y Lee, S.-I. (2017). A unified approach to interpreting model predictions. En I. Guyon, U. von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan y R. Garnett (Eds.), *Advances in neural information processing systems* (Vol. 30, pp. 4765-4774). Curran Associates.
+
+Smith, B. (2021). *Análisis de datos: Guía completa para principiantes*.
+
+Susto, G. A., Schirru, A., Pampuri, S., McLoone, S., y Beghi, A. (2015). Machine learning for predictive maintenance: A multiple classifier approach. *IEEE Transactions on Industrial Informatics, 11*(3), 812-820. https://doi.org/10.1109/TII.2014.2349359

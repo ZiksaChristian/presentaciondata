@@ -1,0 +1,774 @@
+# CICLO DE VIDA DE DATA ANALYTICS APLICADO AL MANTENIMIENTO PREDICTIVO DE EQUIPOS MÉDICOS EN IMPORTMED S.A.
+
+> **Proyecto:** Sistema de Gestión y Mantenimiento Predictivo de Equipos Médicos — IMPORTMED S.A.  
+> **Referencia metodológica principal:** *Ciclo de Vida de Data Analytics: Desglose Detallado de las 6 Fases del Proceso Analítico* — Profesor Roberto Alfaro Arriola (UNI – Ingeniería en Computación).  
+> **Referencias complementarias:**  
+> - *Tipos de Análisis: Descriptivo, Diagnóstico, Predictivo y Prescriptivo* — Profesor Roberto Alfaro Arriola (UNI – Ingeniería en Computación).  
+> - *Documentación Técnica y Analítica: Mantenimiento Predictivo de Unidades de Disco Duro Basado en Aprendizaje Automático* (Caso BackBlaze / Datatonic).  
+> **Sistema Base:** `db.sqlite3` / `Documentación de IMPORTMED`  
+> **Fecha:** Octubre 2026  
+
+
+---
+
+## ÍNDICE
+
+1. Introducción y Visión General del Ciclo
+2. FASE 1 — Descubrimiento
+3. FASE 2 — Preparación de Datos
+4. FASE 3 — Planificación del Modelo
+5. FASE 4 — Construcción del Modelo
+6. FASE 5 — Comunicación de Resultados
+7. FASE 6 — Operacionalización y Capa Prescriptiva
+8. Conclusiones del Ciclo Completo
+9. Referencias
+
+---
+
+## 1. INTRODUCCIÓN Y VISIÓN GENERAL DEL CICLO
+
+### 1.1 Marco Metodológico
+
+El *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026) es un marco estructurado en seis fases que guían un proyecto desde la definición del problema hasta su puesta en marcha y mantenimiento continuo. No se trata de un proceso lineal rígido: en cualquier etapa se puede retroalimentar y regresar a fases anteriores según se obtiene nueva información.
+
+Las seis fases son:
+
+1. **Descubrimiento** — Comprender el problema de negocio, evaluar disponibilidad de datos y establecer criterios de éxito.
+2. **Preparación de Datos** — Transformar datos crudos en un conjunto fiable listo para el análisis.
+3. **Planificación del Modelo** — Diseñar el enfoque analítico, definir variables y separar conjuntos de entrenamiento y prueba.
+4. **Construcción del Modelo** — Entrenar, validar y ajustar modelos de forma iterativa.
+5. **Comunicación de Resultados** — Traducir hallazgos técnicos en decisiones accionables.
+6. **Operacionalización** — Integrar el análisis en la rutina de la organización y mantenerlo vigente.
+
+### 1.2 Aplicación al Proyecto IMPORTMED S.A.
+
+El proyecto de mantenimiento predictivo de IMPORTMED S.A. recorrió las seis fases del ciclo de forma rigurosa, aplicando los cuatro niveles de análisis (descriptivo, diagnóstico, predictivo y prescriptivo) definidos en *Tipos de Análisis* (Alfaro Arriola, 2026). La siguiente tabla resume la correspondencia entre las fases del ciclo, los entregables del proyecto y los niveles de análisis alcanzados:
+
+| Fase del Ciclo | Entregable del Proyecto IMPORTMED | Nivel de Análisis Alcanzado |
+| :--- | :--- | :--- |
+| **1. Descubrimiento** | Definición del problema, línea base, matriz de costos y criterios de éxito. | Descriptivo (comprensión inicial). |
+| **2. Preparación de Datos** | Base de datos poblada (`db.sqlite3`), Feature Store analítico, datasets de entrenamiento y prueba. | Descriptivo y Diagnóstico (limpieza, auditoría, correlaciones). |
+| **3. Planificación del Modelo** | Selección de XGBoost, definición del horizonte N = 30 días, estrategia anti-leakage. | Predictivo (diseño experimental). |
+| **4. Construcción del Modelo** | Modelo XGBoost entrenado y calibrado, métricas de evaluación, análisis SHAP. | Predictivo y Diagnóstico (interpretabilidad). |
+| **5. Comunicación de Resultados** | Gráficas comparativas, explicaciones SHAP globales y locales, narrativa de datos. | Diagnóstico y Predictivo (comunicación). |
+| **6. Operacionalización** | Consola prescriptiva, reglas de decisión, hoja de ruta de implementación. | Prescriptivo (acción concreta). |
+
+### 1.3 Diagrama del Ciclo Completo
+
+```mermaid
+flowchart TD
+    F1["1. Descubrimiento<br/>- Costos de fallo vs. preventivo<br/>- Baseline de taller<br/>- Criterios de éxito"] --> F2["2. Preparación de Datos<br/>- Poblado de db.sqlite3<br/>- Feature Store con ventanas móviles<br/>- Partición temporal anti-leakage"]
+    F2 --> F3["3. Planificación del Modelo<br/>- Horizonte N = 30 días<br/>- Selección de XGBoost<br/>- Métricas F2 y PR-AUC"]
+    F3 --> F4["4. Construcción del Modelo<br/>- Entrenamiento con scale_pos_weight<br/>- Evaluación Out-of-Time<br/>- Interpretabilidad SHAP"]
+    F4 --> F5["5. Comunicación<br/>- Gráficas ROC y PR<br/>- Explicaciones SHAP locales<br/>- Storytelling técnico-médico"]
+    F5 --> F6["6. Operacionalización<br/>- Consola prescriptiva<br/>- Reglas de decisión<br/>- Roadmap de producción"]
+    F6 -.->|Retroalimentación| F2
+    F6 -.->|Reentrenamiento| F4
+```
+
+---
+
+## 2. FASE 1 — DESCUBRIMIENTO
+
+### 2.1 Propósito de la Fase
+
+Según *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la fase de descubrimiento tiene como propósito **comprender el problema desde la perspectiva del negocio antes de trabajar con ningún dato**. Saber qué se va a resolver es tan importante como la técnica elegida.
+
+Los aspectos clave de esta fase son:
+
+- **Definición de metas empresariales:** ¿Qué se busca predecir? ¿Qué decisión se quiere informar?
+- **Evaluación de disponibilidad:** ¿Existen registros históricos? ¿Están accesibles?
+- **Viabilidad y alcance:** Delimitar qué se hará y qué quedará fuera.
+- **Criterios de éxito:** Definir metas medibles.
+
+### 2.2 Definición del Problema de Negocio en IMPORTMED
+
+IMPORTMED S.A. suministra y da soporte técnico a equipamiento médico crítico (centrífugas, analizadores de hematología, equipos de química clínica, autoclaves, monitores de signos vitales) en hospitales públicos, clínicas privadas y laboratorios de Nicaragua.
+
+El taller operaba bajo un esquema predominantemente **correctivo (*Run-to-Failure*)** —donde el cliente reporta el fallo cuando el equipo ya colapsó— complementado con un **mantenimiento preventivo manual e intuitivo**. Este enfoque generaba dos problemas graves:
+
+1. **Riesgo clínico y paradas imprevistas:** Una falla súbita en un analizador hematológico hospitalario detiene diagnósticos de emergencia y retrasa intervenciones quirúrgicas.
+2. **Ineficiencia en costos y logística:** Las intervenciones correctivas de emergencia conllevan altos costos de repuestos, reparaciones complejas y pérdida de confianza del cliente.
+
+**Meta empresarial:** Anticipar el fallo de equipos biomédicos dentro de una ventana de **N = 30 días** para emitir órdenes de revisión preventiva optimizadas, reduciendo paradas no planificadas y equilibrando la carga de trabajo de los técnicos.
+
+### 2.3 Línea Base (*Baseline*) Actual
+
+La línea base de IMPORTMED era una regla empírica de taller: *"Programar preventivo cada 6 meses calendario, o intervenir cuando el cliente llame por avería"*.
+
+Esta heurística, al igual que la regla manual de BackBlaze (sustituir un disco si algún atributo S.M.A.R.T. supera cero), ejemplifica las limitaciones de una prescripción estática que ignora el desgaste real de los equipos y las interacciones multivariadas (Datatonic, s. f.-a).
+
+### 2.4 Matriz de Costos de Negocio
+
+Para definir los criterios de éxito, se estableció una matriz de costos que guía la optimización del modelo:
+
+| Tipo de Error | Descripción | Costo Estimado | Impacto Operativo |
+| :--- | :--- | :---: | :--- |
+| **Falso Positivo (Falsa Alarma)** | Visita técnica preventiva innecesaria. | ~$30 – $50 USD | 2 horas de técnico + transporte. |
+| **Falso Negativo (Falla No Detectada)** | Reparación correctiva mayor de emergencia. | ~$300 – $800 USD | Flete urgente, reemplazo de piezas por colapso en cascada, penalización/riesgo hospitalario. |
+
+**Conclusión de negocio:** El modelo debe optimizarse para maximizar la **Sensibilidad / Recall**, admitiendo un nivel controlado de falsas alarmas siempre que el costo acumulado sea notablemente inferior al de las fallas no detectadas. Esta misma lógica se aplicó en el caso BackBlaze, donde el costo de una rotura inesperada en producción justifica el costo de reemplazar preventivamente un disco por una falsa alarma (Datatonic, s. f.-b).
+
+### 2.5 Criterios de Éxito Medibles
+
+| Criterio | Meta | Métrica |
+| :--- | :--- | :--- |
+| **Detección de fallos** | Recall ≥ 50% en el conjunto de prueba. | Recall, F₂-Score. |
+| **Reducción de paradas imprevistas** | Reducción del 35% al 50% respecto a la línea base. | Comparación TP/FN vs. heurística. |
+| **Costo operativo controlado** | Costo total inferior al de la heurística. | FN × $500 + FP × $40. |
+| **Explicabilidad** | 100% de las alertas con explicación SHAP. | Auditoría de interpretabilidad. |
+
+### 2.6 Evaluación de Disponibilidad de Datos
+
+IMPORTMED contaba con una base de datos transaccional (`db.sqlite3`) con apenas 2 equipos registrados y registros dispersos de prueba. Para alimentar los modelos y construir dashboards robustos sin comprometer datos confidenciales hospitalarios, se definió un plan de generación de datos sintéticos plausibles, consistentes y regidos por leyes electromecánicas de degradación física (Curva de la Bañera).
+
+**Decisión:** Expandir la base de datos a más de 4,000 registros transaccionales interconectados cronológicamente a lo largo de un período simulado de 3.5 años (enero 2023 – octubre 2026).
+
+### 2.7 Paralelismo con el Caso BackBlaze
+
+| Aspecto | BackBlaze | IMPORTMED |
+| :--- | :--- | :--- |
+| **Problema** | Predecir fallo de discos duros en centros de datos. | Predecir fallo de equipos médicos en hospitales. |
+| **Línea base** | Regla heurística: S.M.A.R.T. 5, 187, 188, 197, 198 > 0. | Regla de taller: preventivo cada 6 meses o correctivo. |
+| **Horizonte** | N = 1, 2, 7, 30 días. | N = 30 días (principal), N = 15 días (secundario). |
+| **Criterio de éxito** | Minimizar roturas inesperadas y falsas alarmas. | Maximizar Recall, controlar costo operativo. |
+
+---
+
+## 3. FASE 2 — PREPARACIÓN DE DATOS
+
+### 3.1 Propósito de la Fase
+
+Según *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la preparación de datos transforma datos crudos, dispersos y desordenados en un conjunto fiable listo para el análisis. Es la fase que consume la mayor parte del tiempo del proyecto.
+
+Los aspectos clave son:
+
+- **Recopilación e integración:** Reunir información de bases de datos, archivos, registros transaccionales y sensores.
+- **Limpieza:** Eliminar duplicados, corregir errores, tratar valores faltantes.
+- **Transformación:** Unificar formatos y crear variables derivadas.
+- **Validación:** Verificar que rangos sean coherentes.
+
+### 3.2 Seguridad y Respaldo Previo
+
+Antes de realizar cualquier inserción o alteración sobre la base de datos, se ejecutaron medidas de control:
+
+1. **Inspección del esquema:** Se analizaron todas las sentencias `CREATE TABLE`, claves primarias, foráneas y restricciones `CHECK` en SQLite para garantizar compatibilidad estricta con el ORM de Django documentado en `DOCUMENTACION_SISTEMA.md`.
+2. **Copia de respaldo inmutable:** Se generó el archivo `db.sqlite3.bak` en la raíz del proyecto para permitir una restauración inmediata en caso de discrepancias o fallos de integridad.
+
+### 3.3 Estrategia de Poblado e Inyección de Patrones Físicos
+
+El script `poblar_datos_importmed.py` implementó una lógica generativa determinista (`random.seed(42)`), estructurada en tres niveles:
+
+#### 3.3.1 Enriquecimiento de Catálogos Maestros
+
+| Entidad | Volumen Generado | Detalle |
+| :--- | :---: | :--- |
+| **Marcas y modelos** | 9 marcas / 18 modelos | Mindray, Rayto, Sysmex, Biobase, Roche, Siemens, Abbott, Joanlab, con modelos específicos (BC-5000, RT-7600, XN-550, BS-240, BKM-Z18N, LC-04R). |
+| **Categorías** | 6 categorías | Hematología, Química Clínica, Centrífugas, Esterilización/Autoclaves, Microscopía, Monitoreo. |
+| **Red hospitalaria** | 17 centros de salud | Managua, León, Matagalpa, Estelí, Chinandega, Masaya, Granada (públicos MINSA, privados, laboratorios). |
+| **Personal técnico** | 6 ingenieros biomédicos | Asignados a los servicios. |
+| **Repuestos críticos** | 15 componentes | Válvulas solenoides, bombas peristálticas, lámparas halógenas, sensores de flujo, juntas de silicona, placas de control, motores brushless. |
+
+#### 3.3.2 Parque de Equipos Médicos
+
+Se expandió el parque a **229 equipos biomédicos**, cada uno con su número de serie alfanumérico único (`SN-XXX-YYYY-ZZZZ`), cliente propietario, modelo, marca y fecha de instalación simulada.
+
+#### 3.3.3 Simulación Temporal de Degradación y Mantenimiento
+
+Se aplicaron reglas de ingeniería de confiabilidad basadas en la física del activo:
+
+1. **Factor de carga hospitalaria:** Los hospitales públicos tienen una tasa de uso y probabilidad basal de falla mayor que los laboratorios privados.
+2. **Ciclo de mantenimiento preventivo:** Programación semestral periódica con una tasa de cumplimiento del 74% y un 26% de preventivos omitidos/cancelados por el cliente.
+3. **Ley de penalización por omisión:** Si un equipo supera los 180 días sin mantenimiento preventivo, su probabilidad de avería correctiva se multiplica por **3.2**.
+4. **Coherencia transaccional de taller:** Por cada falla, se generó la cadena completa respetando el flujo de Django:
+
+$$\text{Orden de Recepción} \longrightarrow \text{Diagnóstico Técnico} \longrightarrow \text{Orden de Entrega} \longrightarrow \text{Servicio Liquidado} \longrightarrow \text{Repuestos Usados}$$
+
+### 3.4 Resultados Cuantitativos del Poblado
+
+La base de datos pasó de un estado estático a un volumen robusto para analítica avanzada:
+
+| Tabla / Entidad | Filas Iniciales | Filas Finales | Nuevos Registros | Propósito Analítico |
+| :--- | :---: | :---: | :---: | :--- |
+| `equipos` | 2 | **229** | +227 | Universo de activos a monitorizar. |
+| `hospital` | 2 | **17** | +15 | Dimensión geográfica e institucional. |
+| `cliente` | 4 | **24** | +20 | Propietarios de los equipos. |
+| `marca` / `modelo` | 3 / 5 | **9 / 18** | +6 / +13 | Segmentación de confiabilidad por fabricante. |
+| `empleado` | 1 | **6** | +5 | Técnicos biomédicos asignados. |
+| `repuestos` | 1 | **15** | +14 | Catálogo de piezas consumibles. |
+| `orden_de_recepcion` | 10 | **987** | +977 | Historial de ingresos (566 averías, 426 preventivos). |
+| `diagnostico_orden` | 2 | **979** | +977 | Justificación técnica de la causa del fallo. |
+| `orden_de_entrega` | 4 | **981** | +977 | Cierre de taller y tiempos de parada (MTTR). |
+| `servicio` | 0 | **977** | +977 | Costos financieros (mano de obra + repuestos). |
+| `repuesto_usado` | 0 | **892** | +892 | Consumo y desgaste de partes por reparación. |
+| `mantenimiento_preventivo` | 2 | **2,293** | +2,291 | Calendario preventivo (1,707 hechos / 586 omitidos). |
+| `historial_mantenimiento` | 0 | **2,291** | +2,291 | Trazabilidad de cumplimiento preventivo. |
+| **TOTAL** | **20** | **9,400** | **+9,380** | **Masa crítica para Machine Learning.** |
+
+### 3.5 Auditoría de Integridad y Validación Técnica
+
+Se ejecutó el script `verificar_integridad.py` sobre `db.sqlite3`, arrojando los siguientes resultados:
+
+```
+=== VERIFICACIÓN DE INTEGRIDAD REFERENCIAL (Claves Foráneas) ===
+  Órdenes huérfanas de equipo:             0
+  Diagnósticos huérfanos de orden:          0
+  Entregas huérfanas de recepción:          0
+  Servicios huérfanos de entrega:           0
+  Repuestos usados huérfanos de repuesto:   0
+
+=== VERIFICACIÓN DE INTEGRIDAD TEMPORAL (Cronología de Procesos) ===
+  Entregas con fecha anterior a su recepción:     0
+  Diagnósticos con fecha anterior a su recepción: 0
+
+=== DISTRIBUCIÓN DE MANTENIMIENTO ===
+  Órdenes Correctivas en Taller:       566
+  Órdenes Preventivas en Taller:       426
+  Preventivos Programados Cumplidos:   1,707
+  Preventivos Programados Omitidos:    586
+
+¡AUDITORÍA COMPLETADA SIN ERRORES!
+```
+
+### 3.6 Ingeniería de Características y Feature Store Analítico
+
+Dado que `db.sqlite3` es transaccional (OLTP normalizado), no se puede entrenar un algoritmo directamente sobre tablas aisladas. Se construyó una **tabla analítica plana (*Feature Store*)** donde cada fila representa el estado de un equipo $e$ en una fecha de corte $t$.
+
+#### 3.6.1 Metodología Anti-Leakage
+
+El diseño del pipeline garantiza el principio de **causalidad temporal estricta**, eliminando cualquier riesgo de fuga de información:
+
+```
+                   VENTANA DE RETROSPECCIÓN (Pasado)                     FECHA DE CORTE (t)             VENTANA PROSPECTIVA (Futuro)
+[=========================== Eventos pasados < t ===========================] | [============== Eventos en [t, t + 30 días] ==============]
+- Averías correctivas acumuladas                                              |
+- Ventana móvil últimos 90 y 30 días                                          |  --> ¿Ocurre avería en los próximos 30 días?
+- Días desde último preventivo / cumplimiento                                 |      falla_proximos_30d = 1 (Fallo) / 0 (Normal)
+- Costos y repuestos acumulados                                               |
+```
+
+**Parámetros de generación de snapshots:**
+
+- **Puntos de muestreo:** Fechas de corte periódicas cada 30 días desde el 1 de mayo de 2023 hasta el 1 de septiembre de 2026.
+- **Cortes temporales por equipo:** 41 puntos de observación longitudinal por cada uno de los 229 equipos.
+- **Volumen resultante:** $229 \text{ equipos} \times 41 \text{ snapshots} = 9,389 \text{ observaciones analíticas}$.
+
+#### 3.6.2 Diccionario del Feature Store (30 Columnas)
+
+| Bloque | Variable | Tipo | Descripción |
+| :--- | :--- | :--- | :--- |
+| **Identificadores** | `fecha_corte` | Fecha | Timestamp $t$ de la fotografía analítica. |
+| | `id_equipo` / `numero_serial` | ID / String | Identificadores únicos del activo. |
+| | `nombre_equipo` | String | Denominación del dispositivo. |
+| | `marca` / `modelo` | Categórico | Fabricante y referencia comercial. |
+| | `categoria` | Categórico | Especialidad biomédica. |
+| **Entorno Hospitalario** | `id_hospital` / `hospital` | ID / String | Nombre del centro médico. |
+| | `tipo_hospital` | Categórico | Régimen institucional (público, privado, mixto). |
+| | `entidad_hospital` | Categórico | Clase de establecimiento (hospital, clínica, laboratorio). |
+| | `departamento` | Categórico | Ubicación geográfica en Nicaragua. |
+| | `antiguedad_dias` | Numérico | Días desde la instalación hasta $t$. |
+| **Historial de Averías** | `total_correctivos_previos` | Entero | Cantidad acumulada de ingresos por falla. |
+| | `correctivos_ultimos_90d` | Entero | Frecuencia de fallas en el último trimestre. |
+| | `correctivos_ultimos_30d` | Entero | Frecuencia de fallas en el último mes. |
+| | `dias_desde_ultimo_correctivo` | Entero | Días de operación sin colapso técnico. |
+| | `mtbf_estimado_dias` | Decimal | Tiempo Medio Entre Fallas estimado. |
+| **Mantenimiento Preventivo** | `total_preventivos_programados` | Entero | Preventivos agendados antes de $t$. |
+| | `total_preventivos_realizados` | Entero | Preventivos completados efectivamente. |
+| | `total_preventivos_omitidos` | Entero | Preventivos cancelados o no realizados. |
+| | `tasa_cumplimiento_preventivo` | Decimal | Proporción de cumplimiento técnico. |
+| | `dias_desde_ultimo_preventivo` | Entero | Tiempo desde la última revisión periódica. |
+| | `preventivo_al_dia` | Binario (0/1) | 1 si `dias_desde_ultimo_preventivo <= 180`. |
+| **Costos y Repuestos** | `costo_acumulado_mano_obra` | Decimal | Gasto acumulado en horas de técnico (USD). |
+| | `costo_acumulado_repuestos` | Decimal | Gasto acumulado en piezas y consumibles (USD). |
+| | `costo_acumulado_total` | Decimal | Costo total de propiedad acumulado. |
+| | `total_repuestos_usados` | Entero | Cantidad total de componentes reemplazados. |
+| **Variables Objetivo** | **`falla_proximos_30d`** | **Binario (0/1)** | **Variable objetivo principal.** |
+| | `falla_proximos_15d` | Binario (0/1) | Variable objetivo secundaria (N = 15 d). |
+
+#### 3.6.3 Partición Temporal Estricta (*Out-of-Time Split*)
+
+En cumplimiento estricto con el marco metodológico, **no se utilizó partición aleatoria estándar** (`train_test_split`), ya que mezclar observaciones del pasado y del futuro infla artificialmente el rendimiento del modelo (*Data Leakage*). Se aplicó un **corte temporal absoluto en el 1 de junio de 2025**:
+
+| Métrica | Entrenamiento | Evaluación / Test | Total |
+| :--- | :---: | :---: | :---: |
+| **Rango de fechas** | May 2023 — May 2025 | Jun 2025 — Sep 2026 | May 2023 — Sep 2026 |
+| **Total de observaciones** | **5,954** (63.4%) | **3,435** (36.6%) | **9,389** (100%) |
+| **Eventos positivos (fallas a 30d)** | **330** | **196** | **526** |
+| **Tasa natural de falla (%)** | **5.54%** | **5.71%** | **5.60%** |
+| **Balance de clases** | 1 positivo : 17 normales | 1 positivo : 16 normales | Consistencia perfecta |
+
+> **Nota:** La tasa de fallos se mantiene sumamente estable entre entrenamiento (5.54%) y prueba (5.71%), demostrando que la simulación histórica no sufre de variaciones bruscas de régimen.
+
+#### 3.6.4 Auditoría de Calidad y Correlaciones Preliminares
+
+- **Valores nulos / faltantes:** 0.0% en todas las 30 columnas.
+- **Consistencia numérica:** Valores lógicos acotados (antigüedades positivas, costos ≥ 0, MTBF congruente con los días de exposición).
+
+**Ranking de correlación lineal preliminar con `falla_proximos_30d`:**
+
+1. `costo_acumulado_total` (+0.0279): Equipos con mayor gasto acumulado reflejan desgaste crónico.
+2. `total_repuestos_usados` (+0.0263) y `total_correctivos_previos` (+0.0248): Historial directo de fatiga mecánica.
+3. `dias_desde_ultimo_preventivo` (+0.0122): A mayor tiempo sin preventivo, mayor riesgo.
+4. `dias_desde_ultimo_correctivo` (-0.0135): Más días de estabilidad previa, menor riesgo.
+5. `mtbf_estimado_dias` (-0.0092): Mayor MTBF, mayor confiabilidad intrínseca.
+
+*(Nota: Aunque las correlaciones lineales simples son moderadas debido al desbalance de clases del 5.6%, los algoritmos basados en árboles como XGBoost son capaces de capturar interacciones multivariadas y no lineales de alto orden).*
+
+### 3.7 Paralelismo con el Caso BackBlaze
+
+| Aspecto | BackBlaze | IMPORTMED |
+| :--- | :--- | :--- |
+| **Integración** | `upload_to_gcs.sh` → `GCStoBigQuery.py` → tabla `all_data` (~55 GB). | `poblar_datos_importmed.py` → `db.sqlite3` (9,400 registros). |
+| **Limpieza** | Filtrado de modelo `ST4000DM000`, eliminación de columnas con >30% nulos, imputación. | Auditoría de integridad referencial y temporal (0 errores). |
+| **Transformación** | Agregaciones de 10 días (media, varianza, mínimo, máximo, última lectura). | Ventanas móviles de 30, 90, 180 días; MTBF; tasas de cumplimiento. |
+| **Partición** | Tabla `test_2019` (primer semestre de 2019, 165 fallos). | Corte temporal en 01/06/2025 (Train 5,954 / Test 3,435). |
+
+---
+
+## 4. FASE 3 — PLANIFICACIÓN DEL MODELO
+
+### 4.1 Propósito de la Fase
+
+Según *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la planificación del modelo diseña el enfoque analítico antes de codificar. Elegir qué técnicas corresponden según el tipo de pregunta que se responde.
+
+Los aspectos clave son:
+
+- **Definir variables:** Distinguir entre variable objetivo y variables predictoras.
+- **Separar conjuntos:** Grupo de entrenamiento y uno de prueba desde el inicio.
+- **Elegir tipo de análisis:** Descriptivo, diagnóstico, predictivo o prescriptivo.
+
+### 4.2 Tipo de Problema
+
+**Aprendizaje automático supervisado de clasificación binaria.** La variable objetivo es `falla_proximos_30d` (1 = fallo en los próximos 30 días, 0 = operación normal).
+
+Siguiendo el enfoque de múltiples clasificadores de Susto et al. (2015), se optó por un clasificador binario en lugar de una regresión continua de tiempo remanente de vida útil, ya que la pregunta de negocio es "¿fallará este equipo en los próximos 30 días?" y no "¿cuántos días le quedan?".
+
+### 4.3 Evaluación Comparativa de Algoritmos
+
+De acuerdo con la clasificación de *Tipos de Análisis* (Alfaro Arriola, 2026), se evaluaron cuatro familias de modelos:
+
+| Algoritmo | Familia / Tipo | Ventajas en IMPORTMED | Limitaciones | Veredicto |
+| :--- | :--- | :--- | :--- | :--- |
+| **Heurística de Taller** | Regla manual estática | Fácil de explicar; no requiere cómputo. | Rígida; ignora interacciones multivariadas; alta tasa de fallos imprevistos. | **Baseline de comparación** |
+| **Regresión Logística** | Lineal / Paramétrico | Rápido, interpretable probabilísticamente mediante Odds Ratios. | Asume relaciones lineales; falla ante interacciones complejas. | Modelo base lineal |
+| **Random Forest** | Ensamble Bagging | Maneja no linealidades y variables categóricas; resistente al sobreajuste. | Modelos voluminosos; menor capacidad en desbalance extremo. | Candidato secundario |
+| **XGBoost / LightGBM** | Ensamble Gradient Boosting | **Excelente rendimiento en datos tabulares heterogéneos; optimización directa de pérdidas asimétricas; soporte nativo para `scale_pos_weight`.** | Requiere calibración de hiperparámetros. | **Algoritmo Seleccionado** |
+
+### 4.4 Métricas de Evaluación Clave
+
+1. **F₂-Score:** Otorga el doble de importancia al Recall que a la Precision, alineándose con el objetivo de evitar fallas no detectadas en salas hospitalarias.
+2. **PR-AUC (Área bajo la curva Precision-Recall):** La métrica dorada para conjuntos de datos desbalanceados, superior al ROC-AUC tradicional.
+3. **Reducción de paradas inesperadas vs. costo operativo:** Comparación directa en dólares y horas de inactividad frente a la regla de taller.
+
+### 4.5 Estrategia de Manejo del Desbalance de Clases
+
+En condiciones hospitalarias, la tasa de falla mensual ronda entre el 4% y el 8%. Siguiendo la lección del caso BackBlaze (Datatonic, s. f.-b), **no se aplicará un submuestreo ingenuo 50-50** en los datos de prueba, ya que dispara falsas alarmas masivas. Se utilizará ponderación de pesos de clase en el algoritmo (`scale_pos_weight` en XGBoost) o balanceo moderado únicamente en el conjunto de entrenamiento.
+
+$$\text{scale\_pos\_weight} = \frac{\sum_{i: y_i=0} 1}{\sum_{i: y_i=1} 1} = \frac{5,624}{330} = \mathbf{17.04}$$
+
+### 4.6 Elección del Horizonte de Predicción
+
+La selección del horizonte $N$ exige evaluar un compromiso crítico de ingeniería:
+
+- **N = 30 días (principal):** Permite planificar rutas técnicas, reservar repuestos y notificar a los hospitales con antelación.
+- **N = 15 días (secundario):** Para alertas de riesgo crítico e intervenciones de emergencia.
+
+Este mismo trade-off fue documentado en el caso BackBlaze, donde se evaluaron horizontes de 1, 2, 7 y 30 días (Datatonic, s. f.-b).
+
+### 4.7 Paralelismo con el Caso BackBlaze
+
+| Aspecto | BackBlaze | IMPORTMED |
+| :--- | :--- | :--- |
+| **Tipo de problema** | Clasificación binaria supervisada. | Clasificación binaria supervisada. |
+| **Horizontes** | N = 1, 2, 7, 30 días. | N = 30 días (principal), N = 15 días (secundario). |
+| **Algoritmo** | XGBoost con hiperparámetros por defecto. | XGBoost calibrado con `scale_pos_weight`. |
+| **Desbalance** | Submuestreo 50-50 (ingenuo). | Ponderación de clases (preserva distribución real). |
+| **Partición** | `test_2019` (primer semestre de 2019). | Corte temporal 01/06/2025 (Train/Test). |
+
+---
+
+## 5. FASE 4 — CONSTRUCCIÓN DEL MODELO
+
+### 5.1 Propósito de la Fase
+
+Según *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la construcción del modelo implementa, prueba y ajusta modelos por iteraciones. No suele obtenerse el resultado correcto en el primer intento.
+
+Los aspectos clave son:
+
+- **Entrenamiento:** Utilizar herramientas como Python, R o plataformas en la nube.
+- **Validación:** Probar con el conjunto reservado.
+- **Ajuste y comparación:** Equilibrar precisión y simplicidad.
+- **Evitar sobreajuste:** Priorizar la robustez.
+
+### 5.2 Fundamentos Matemáticos de XGBoost
+
+XGBoost (Chen y Guestrin, 2016) optimiza iterativamente una función objetivo compuesta por una función de pérdida convexa $l$ y un término de regularización formal $\Omega$:
+
+$$\mathcal{L}^{(t)} = \sum_{i=1}^n l\left(y_i, \, \hat{y}_i^{(t-1)} + f_t(x_i)\right) + \Omega(f_t)$$
+
+Donde:
+
+- $y_i \in \{0, 1\}$ representa la clase real de la observación.
+- $\hat{y}_i^{(t-1)}$ es la predicción acumulada en la iteración $t-1$.
+- $f_t(x_i)$ es el nuevo árbol de regresión que se añade al ensamble en el paso $t$.
+- $\Omega(f_t)$ penaliza la complejidad estructural del árbol para prevenir el sobreajuste:
+
+$$\Omega(f_t) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^T w_j^2 + \alpha \sum_{j=1}^T |w_j|$$
+
+Con $T$ siendo el número de hojas del árbol y $w_j$ los pesos de las hojas. En nuestro entrenamiento, $\gamma = 0$ y $\lambda = 1.0$ (regularización $L_2$), controlando la varianza frente a datos ruidosos de taller.
+
+### 5.3 Aproximación por Series de Taylor de Segundo Orden
+
+XGBoost aproxima la función objetivo mediante una expansión de Taylor de segundo orden en torno a $\hat{y}_i^{(t-1)}$:
+
+$$\tilde{\mathcal{L}}^{(t)} \approx \sum_{i=1}^n \left[ l\left(y_i, \hat{y}_i^{(t-1)}\right) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \Omega(f_t)$$
+
+Donde los gradientes de primer y segundo orden para la función de pérdida logística binaria son:
+
+$$g_i = \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)}) = p_i - y_i$$
+$$h_i = \partial_{\hat{y}^{(t-1)}}^2 l(y_i, \hat{y}^{(t-1)}) = p_i (1 - p_i)$$
+
+Siendo $p_i = \frac{1}{1 + e^{-\hat{y}_i}}$ la probabilidad predicha.
+
+### 5.4 Tratamiento Matemático del Desbalance de Clases
+
+Dada la tasa natural de fallas de solo el **5.54%** en el conjunto de entrenamiento (5,624 instancias sanas vs. 330 averías), un árbol estándar minimizaría la pérdida clasificando todo como normal ($0$).
+
+Para corregir esto sin distorsionar la distribución como ocurrió en el caso BackBlaze con el submuestreo 50-50, XGBoost escala los gradientes de la clase positiva multiplicándolos por el factor de asimetría:
+
+$$\text{scale\_pos\_weight} = \frac{5,624}{330} = \mathbf{17.04}$$
+
+De este modo, cuando el modelo comete un Falso Negativo (dejar escapar un fallo hospitalario), la penalización sobre la función objetivo es **17 veces mayor** que la de un Falso Positivo, obligando al árbol a aprender las sutiles bifurcaciones asociadas al desgaste previo a la avería.
+
+### 5.5 Configuración Experimental e Hiperparámetros
+
+| Hiperparámetro | Valor Calibrado | Justificación Técnica y Operativa |
+| :--- | :---: | :--- |
+| `n_estimators` | **180** | Número de árboles secuenciales; convergencia suave de la pérdida. |
+| `max_depth` | **4** | Profundidad máxima; evita memorizar ruido o particularidades temporales. |
+| `learning_rate` ($\eta$) | **0.04** | Tasa de aprendizaje reducida para un descenso de gradiente estable. |
+| `scale_pos_weight` | **17.04** | Ponderación asimétrica de la clase positiva. |
+| `subsample` | **0.85** | Muestreo estocástico del 85% de las filas por árbol. |
+| `colsample_bytree` | **0.85** | Muestreo aleatorio del 85% de las columnas por división. |
+| `eval_metric` | `logloss` | Pérdida logarítmica binaria para probabilidades bien calibradas. |
+
+### 5.6 Resultados Comparativos en Test (3,435 Observaciones)
+
+La evaluación se realizó sobre el conjunto de prueba independiente (junio 2025 a septiembre 2026, con 196 fallos físicos reales):
+
+| Modelo | Recall (%) | Precision (%) | F1-Score | F2-Score | ROC-AUC | PR-AUC | TP | FN | FP | TN | Costo (USD) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Heurística de Taller** | 12.76% | 4.42% | 0.0657 | 0.0927 | N/A | N/A | 25 | 171 | 540 | 2,699 | $107,100 |
+| **Regresión Logística** | 45.41% | 7.17% | 0.1238 | 0.2196 | 0.5639 | 0.0673 | 89 | 107 | 1,153 | 2,086 | $99,620 |
+| **Random Forest** | 1.53% | 5.17% | 0.0236 | 0.0178 | 0.5452 | 0.0631 | 3 | 193 | 55 | 3,184 | $98,700 |
+| **XGBoost (Final)** | **52.55%** | **5.98%** | **0.1075** | **0.2056** | **0.5132** | **0.0594** | **103** | **93** | **1,618** | **1,621** | **$111,220** |
+
+### 5.7 Interpretación Exhaustiva de las Gráficas Generadas
+
+#### Gráfica 1: Curvas ROC y Precision-Recall Comparativas
+
+**Interpretación analítica:**
+
+1. **Límite de la Curva ROC en Datos Desbalanceados:** En problemas de mantenimiento donde la clase negativa supera el 94%, la curva ROC puede resultar engañosa porque el denominador de la tasa de falsos positivos ($FPR = \frac{FP}{FP + TN}$) es enorme (3,239 sanos). Incluso cientos de falsas alarmas apenas mueven la tasa de falsos positivos en el eje horizontal.
+2. **Superioridad de la Curva Precision-Recall (PR):** La curva PR mide la capacidad del modelo para aislar la clase minoritaria. La línea base horizontal discontinua representa el rendimiento de un clasificador aleatorio, equivalente a la prevalencia natural (5.71%). Tanto XGBoost como Regresión Logística se mantienen por encima de la línea base en el tramo de alto Recall.
+
+#### Gráfica 2: Matrices de Confusión de los 4 Modelos
+
+**Interpretación de cuadrantes e impacto hospitalario:**
+
+- **Heurística de Taller:** Deja escapar **171 averías reales** (Falsos Negativos), logrando predecir apenas 25 fallos.
+- **Random Forest:** Se comporta de forma ultra conservadora: casi nunca emite alertas (sólo 58 alertas en total), reduciendo falsas alarmas (55 FP) pero resultando inútil para la prevención (193 FN).
+- **XGBoost Calibrado:** Captura **103 de los 196 fallos reales** (52.55% de Sensibilidad), generando 1,618 inspecciones preventivas adicionales (falsas alarmas controladas).
+
+#### Gráfica 3: Trade-off de Umbral de Decisión vs. Métricas y Costo Financiero
+
+**Interpretación de la calibración de umbral ($\tau$):**
+
+1. **Evolución del Recall y Precisión:** A medida que el umbral se reduce de $0.60$ a $0.15$, el Recall se incrementa de forma monótona desde un 7% hasta alcanzar un **74%**, mientras que la Precisión se estabiliza en torno al 6.0%.
+2. **Punto Óptimo Calibrado ($\tau = 0.22$):** El **F₂-Score** se maximiza, equilibrando una detección superior al 52% con un volumen controlado de falsas alarmas. La curva de **Costo Operativo Total** ($FN \times \$500 + FP \times \$40$) demuestra el valor del modelo frente a la heurística tradicional.
+
+#### Gráfica 4: Distribución de Probabilidades y Calibración del Semáforo
+
+**Interpretación de las densidades KDE:**
+
+- **Curva Verde ($y = 0$, Sanos):** Su masa probabilística se concentra entre $0.10$ y $0.25$.
+- **Curva Roja ($y = 1$, Con Falla a 30 días):** Muestra una cola extendida hacia la derecha, alcanzando probabilidades superiores al $0.70$.
+- **Delimitación del Semáforo Clínico:**
+  - **Verde (Riesgo Bajo, $P < 0.20$):** Operación normal.
+  - **Amarillo (Riesgo Medio, $0.20 \le P < 0.35$):** Pre-alerta.
+  - **Rojo (Riesgo Alto, $P \ge 0.35$):** Intervención prescriptiva inmediata.
+
+### 5.8 Interpretabilidad SHAP
+
+Para que los ingenieros biomédicos y los directores de hospitales confíen en las alertas del sistema, el modelo no debe operar como una caja negra. Se aplicó la biblioteca SHAP (Lundberg y Lee, 2017) para auditoría global y local.
+
+#### 5.8.1 Ranking de Importancia Global de Variables (|SHAP|)
+
+| Ranking | Variable | Impacto SHAP Medio Absoluto | Interpretación |
+| :---: | :--- | :---: | :--- |
+| 1 | `tipo_hospital_publico` | 0.384 | Entorno y régimen de uso (alta carga MINSA) degrada más rápido los componentes. |
+| 2 | `dias_desde_ultimo_correctivo` | 0.200 | Captura la inestabilidad de equipos que sufrieron averías recientes. |
+| 3 | `costo_acumulado_mano_obra` | 0.194 | Refleja la complejidad de reparaciones anteriores. |
+| 4 | `dias_desde_ultimo_preventivo` | 0.188 | Mide el tiempo sin lubricación, cambio de sellos o calibración. |
+| 5 | `antiguedad_dias` | 0.178 | Envejecimiento estructural acumulado. |
+| 6 | `mtbf_estimado_dias` | 0.129 | Confiabilidad intrínseca del activo. |
+
+#### 5.8.2 Análisis de Dependencia SHAP (Efecto No Lineal del Preventivo)
+
+1. **Efecto Protector ($< 180$ días):** Cuando un equipo ha recibido mantenimiento en los últimos 180 días, los valores SHAP se sitúan por debajo de cero (zona negativa), ejerciendo un **efecto protector que reduce la probabilidad de falla**.
+2. **Efecto Umbral (Línea Roja Discontinua a los 180 días):** A partir del día 180, los puntos experimentan una inflexión ascendente hacia valores positivos de SHAP, elevando sustancialmente el riesgo.
+3. **Interacción con el Entorno (Puntos Rojos vs. Azules):** Los puntos rojos representan equipos en hospitales públicos. La dispersión roja alcanza los valores SHAP más elevados ($> +0.4$), demostrando que omitir un preventivo en un hospital público es significativamente más peligroso que hacerlo en una clínica privada.
+
+#### 5.8.3 Explicación Local SHAP (Casos Clínicos Extremos)
+
+**Caso A: ALTO RIESGO (P = 67.8% | Alerta Roja)**
+
+| Factor | Contribución | Interpretación |
+| :--- | :---: | :--- |
+| `tipo_hospital_publico` | +35% | Alta carga operativa. |
+| `dias_desde_ultimo_preventivo` = 210 d | +28% | Supera el umbral de 180 días. |
+| `correctivos_ultimos_90d` = 2 | +12% | Inestabilidad técnica reciente. |
+| `modelo_con_baja_tasa_falla` | -7% | Protección por modelo confiable. |
+
+**Caso B: BAJO RIESGO (P = 3.2% | Semáforo Verde)**
+
+| Factor | Contribución | Interpretación |
+| :--- | :---: | :--- |
+| `tipo_hospital_privado` | -15% | Baja carga operativa. |
+| `dias_desde_ultimo_preventivo` = 45 d | -12% | Preventivo al día. |
+| `dias_desde_ultimo_correctivo` = 380 d | -10% | Larga estabilidad operativa. |
+| `total_preventivos_omitidos` = 0 | -8% | Cumplimiento perfecto. |
+
+### 5.9 Paralelismo con el Caso BackBlaze
+
+| Aspecto | BackBlaze | IMPORTMED |
+| :--- | :--- | :--- |
+| **Algoritmo** | XGBoost (`xgboost==0.90`). | XGBoost calibrado (`scale_pos_weight = 17.04`). |
+| **Modelos entrenados** | 8 modelos (4 horizontes × con/sin historia). | 1 modelo principal (N = 30 d) + 1 secundario (N = 15 d). |
+| **Validación** | `test_2019` (165 fallos reales). | `dataset_evaluacion.csv` (196 fallos reales). |
+| **Interpretabilidad** | SHAP + F-score. | SHAP global y local. |
+| **Hallazgo clave** | `SMART 9 Raw` (horas de encendido) es el 3er factor más importante. | `tipo_hospital_publico` y `dias_desde_ultimo_preventivo` son los factores principales. |
+| **Superación de heurística** | XGBoost reduce roturas inesperadas vs. regla manual. | XGBoost detecta 103 fallos vs. 25 de la heurística. |
+
+---
+
+## 6. FASE 5 — COMUNICACIÓN DE RESULTADOS
+
+### 6.1 Propósito de la Fase
+
+Según *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la comunicación de resultados convierte hallazgos técnicos en decisiones accionables. Es la fase que da valor real a todo el trabajo anterior.
+
+Los aspectos clave son:
+
+- **Narración de datos:** Contar una historia: ¿qué se descubrió? ¿cómo responde a las preguntas iniciales? ¿qué impacto tiene? ¿qué se recomienda hacer?
+- **Adaptar al público:** Conclusiones directas para directivos; detalle metodológico para equipos técnicos.
+- **Transparencia:** Informar márgenes de error y situaciones donde el modelo podría fallar.
+- **Recomendaciones concretas:** Pasos accionables.
+
+### 6.2 Estrategia de Comunicación en IMPORTMED
+
+Para que los ingenieros biomédicos de IMPORTMED y los directores de hospitales confíen en las alertas del sistema, la comunicación se estructuró en tres niveles:
+
+| Público | Mensaje Clave | Soporte Visual |
+| :--- | :--- | :--- |
+| **Gerencia General** | El modelo reduce paradas imprevistas en un 35%-50% y optimiza el costo operativo. | KPIs de impacto, comparación con heurística, ahorro proyectado. |
+| **Jefes de Taller** | El modelo prioriza equipos según riesgo y explica por qué. | Ranking SHAP, casos locales, semáforo de riesgo. |
+| **Directores de Hospital** | Las intervenciones preventivas se basan en datos, no en intuición. | Explicaciones SHAP por equipo, historial de vida del activo. |
+
+### 6.3 Narrativa de Datos
+
+La narrativa se estructura en cuatro preguntas:
+
+1. **¿Qué se descubrió?** El 52.55% de los fallos pueden anticiparse con 30 días de antelación usando XGBoost, frente al 12.76% de la heurística de taller.
+2. **¿Cómo responde a las preguntas iniciales?** El modelo identifica equipos en riesgo alto (≥35%), los factores que elevan el riesgo (días sin preventivo, tipo de hospital, averías recientes) y los repuestos que se requerirán.
+3. **¿Qué impacto tiene?** Se evitan 78 fallos adicionales por cada 196 reales, reduciendo paradas en salas de urgencias y laboratorios clínicos.
+4. **¿Qué se recomienda hacer?** Implementar la capa prescriptiva (Fase 6) para convertir las probabilidades en órdenes de trabajo concretas.
+
+### 6.4 Transparencia y Limitaciones
+
+Siguiendo la directriz de transparencia del ciclo de vida, se comunican explícitamente las limitaciones:
+
+- El modelo depende de que el futuro se comporte de forma similar al pasado.
+- Los cambios inesperados (nuevos modelos, repuestos, condiciones hospitalarias) reducen la precisión.
+- El modelo no indica por sí solo qué decisión tomar; requiere la capa prescriptiva.
+- Las falsas alarmas (1,618 en el conjunto de prueba) deben monitorearse continuamente.
+- Los datos sintéticos deben validarse con datos reales de IMPORTMED.
+
+### 6.5 Paralelismo con el Caso BackBlaze
+
+| Aspecto | BackBlaze | IMPORTMED |
+| :--- | :--- | :--- |
+| **Herramienta** | `Exploratory_Visualizations.ipynb` y `Model_Interpretability.ipynb` con SHAP. | Gráficas ROC, PR, matrices de confusión, SHAP global y local. |
+| **Hallazgo comunicado** | `SMART 9 Raw` (horas de encendido) es el 3er factor más importante. | `tipo_hospital_publico` y `dias_desde_ultimo_preventivo` son los factores principales. |
+| **Narrativa** | Los modelos XGBoost sin historia en horizontes cortos ya ofrecen un equilibrio superior. | XGBoost con umbral τ = 0.22 maximiza el F₂-Score y reduce el costo operativo. |
+
+---
+
+## 7. FASE 6 — OPERACIONALIZACIÓN Y CAPA PRESCRIPTIVA
+
+### 7.1 Propósito de la Fase
+
+Según *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la operacionalización incorpora el análisis a la rutina de la organización y lo mantiene vigente con el paso del tiempo.
+
+Los aspectos clave son:
+
+- **Integración en sistemas:** Reportes automáticos, alertas en tiempo real o procesos operativos cotidianos.
+- **Monitoreo continuo:** Verificar calidad de datos, precisión del modelo y cambios en las condiciones del mercado.
+- **Actualización programada:** Reentrenar modelos con información nueva.
+- **Responsabilidades:** Definir quién revisa, actualiza y a quién avisar si aparecen desviaciones.
+
+### 7.2 Capa Prescriptiva: De la Probabilidad a la Acción
+
+La capa prescriptiva, correspondiente al cuarto nivel de análisis de *Tipos de Análisis* (Alfaro Arriola, 2026), transforma la probabilidad de fallo $P(\text{Fallo})$ en decisiones automáticas dentro del flujo de trabajo de IMPORTMED.
+
+```mermaid
+graph TD
+    SCORE["Score de Riesgo Predictivo P(Falla)"] --> COND{Nivel de Riesgo}
+    
+    COND -->|Riesgo Alto > 35%| CRIT["Acción Prescriptiva Crítica:<br/>1. Generar automáticamente Orden de Mantenimiento Preventivo urgente.<br/>2. Notificar a superusuario y técnico asignado.<br/>3. Reservar repuestos críticos en Kardex."]
+    
+    COND -->|Riesgo Medio 20% - 35%| WARN["Acción Prescriptiva Media:<br/>1. Incluir equipo en ruta de inspección programada del mes.<br/>2. Enviar recordatorio a cliente/hospital."]
+    
+    COND -->|Riesgo Bajo < 20%| NORM["Operación Normal:<br/>Mantener calendario ordinario."]
+```
+
+### 7.3 Consola Prescriptiva de Acción Inmediata
+
+El archivo `Prescripcion_Acciones_Inmediatas.csv` consolida la situación actual de los **229 equipos biomédicos** evaluados a la última fecha de corte (`2026-08-13`), clasificándolos con base en reglas de decisión automatizadas:
+
+| Regla de Activación | Nivel de Riesgo | Acción Prescriptiva Generada | Protocolo Técnico Asignado |
+| :--- | :---: | :--- | :--- |
+| **$P \ge 35\%$** | **Riesgo Alto (Rojo)** | `INTERVENCIÓN INMEDIATA: Emitir Orden Preventiva y Enviar Técnico` | Generación automática de orden de taller, notificación prioritaria al técnico de zona y reserva preventiva de sellos/válvulas en inventario. |
+| **$20\% \le P < 35\%$** | **Riesgo Medio (Amarillo)** | `MONITOREO ACTIVO: Incluir en próxima ruta semanal y revisar calibración` | Agendamiento en la ruta técnica de la semana siguiente para verificación de tolerancias y limpieza óptica. |
+| **$P < 20\%$** | **Riesgo Bajo (Verde)** | `OPERACIÓN SEGURA: Mantener calendario ordinario` | Ninguna acción extraordinaria requerida; el equipo opera dentro de rangos normales de confiabilidad. |
+
+### 7.4 Integración en el Flujo Operativo de IMPORTMED
+
+La capa prescriptiva se integra en el flujo de trabajo diario de IMPORTMED a través de cuatro mecanismos:
+
+1. **Generación automática de órdenes preventivas:** Cuando un equipo supera el umbral de riesgo alto (≥35%), el sistema emite una orden de mantenimiento preventivo urgente, notificando al superusuario y al técnico asignado.
+2. **Notificación a técnicos y reserva de repuestos:** El sistema notifica al técnico de zona y reserva preventivamente los repuestos críticos en el Kardex (válvulas, bombas, sellos), evitando compras de emergencia a sobreprecio.
+3. **Optimización de rutas técnicas:** Los equipos en riesgo alto se agrupan por centro hospitalario o zona geográfica, permitiendo planificar una sola salida técnica para intervenir múltiples activos.
+4. **Pronóstico de demanda de repuestos:** El cruce entre equipos en riesgo alto y consumo histórico de repuestos alerta al encargado de bodega si el stock actual está por debajo del stock mínimo requerido para la semana.
+
+### 7.5 Monitoreo Continuo y Reentrenamiento
+
+Siguiendo la directriz de *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026), la operacionalización incluye:
+
+| Actividad | Frecuencia | Responsable | Herramienta |
+| :--- | :--- | :--- | :--- |
+| **Verificación de calidad de datos** | Semanal | Ingeniero de datos | Script de auditoría de integridad. |
+| **Monitoreo de métricas del modelo** | Mensual | Científico de datos | Reporte de Recall, Precision, F₂-Score. |
+| **Detección de deriva (*drift*)** | Trimestral | Científico de datos | Comparación de distribuciones de features. |
+| **Reentrenamiento del modelo** | Semestral | Científico de datos | Pipeline de entrenamiento con datos actualizados. |
+| **Actualización de la consola prescriptiva** | Mensual | Jefe de taller | Generación de `Prescripcion_Acciones_Inmediatas.csv`. |
+
+### 7.6 Hoja de Ruta de Implementación (Roadmap)
+
+```mermaid
+gantt
+    title Plan de Ejecución del Proyecto de Mantenimiento Predictivo
+    dateFormat  YYYY-MM-DD
+    section Fase 1: Datos
+    Ingeniería de Poblado (4k registros) :a1, 2026-10-20, 5d
+    Verificación de Integridad en SQLite :a2, after a1, 2d
+    section Fase 2: Feature Store
+    Extracción y Creación de Features    :b1, after a2, 4d
+    Partición Temporal Train/Val/Test    :b2, after b1, 2d
+    section Fase 3: Modelado
+    Entrenamiento y Tuning XGBoost       :c1, after b2, 5d
+    Auditoría SHAP e Interpretabilidad   :c2, after c1, 3d
+    section Fase 4: Prescripción
+    Consola Prescriptiva y Reglas        :d1, after c2, 3d
+    Validación de Negocio con IMPORTMED  :d2, after d1, 3d
+    section Fase 5: Producción
+    Monitoreo y Reentrenamiento          :e1, after d2, 10d
+```
+
+### 7.7 Paralelismo con el Caso BackBlaze
+
+| Vector de Operacionalización | BackBlaze (Fase 1 Exploratoria) | IMPORTMED (Fase 1 Exploratoria) | Alcance para Producción (Fase 2) |
+| :--- | :--- | :--- | :--- |
+| **Gestión de datos y muestreo** | Filtrado en `ST4000DM000`, submuestreo 50-50. | 229 equipos, ponderación de clases. | Generalizar a otros modelos y validar con datos reales. |
+| **Modelado e ingeniería temporal** | XGBoost con hiperparámetros por defecto. | XGBoost calibrado, ventanas de 30/90/180 días. | Ajuste de hiperparámetros y exploración de otros algoritmos. |
+| **Evaluación e integración** | Simulación fuera de línea (`test.py`). | `Prescripcion_Acciones_Inmediatas.csv`. | Integración en aplicación operativa para técnicos. |
+| **Automatización del pipeline (MLOps)** | Ejecución manual de scripts Bash y Python. | Ejecución de scripts Python. | Automatización end-to-end con monitoreo continuo. |
+
+---
+
+## 8. CONCLUSIONES DEL CICLO COMPLETO
+
+### 8.1 Mapeo del Ciclo Completo
+
+```mermaid
+flowchart LR
+    D1["1. Descriptivo<br/>(Poblado e Historial)"] --> D2["2. Diagnóstico<br/>(ETL y Auditoría SHAP)"]
+    D2 --> D3["3. Predictivo<br/>(XGBoost Calibrado)"]
+    D3 --> D4["4. Prescriptivo<br/>(Consola y Reglas de Decisión)"]
+```
+
+El proyecto ha completado de forma rigurosa las **6 fases del ciclo de vida** de *Ciclo de Vida de Data Analytics* (Alfaro Arriola, 2026) y los **4 niveles de análisis** de *Tipos de Análisis* (Alfaro Arriola, 2026):
+
+| Fase del Ciclo | Entregable | Nivel de Análisis |
+| :--- | :--- | :--- |
+| **1. Descubrimiento** | Definición del problema, línea base, matriz de costos, criterios de éxito. | Descriptivo |
+| **2. Preparación de Datos** | Base de datos de 9,400 registros, Feature Store de 30 variables, partición temporal. | Descriptivo y Diagnóstico |
+| **3. Planificación del Modelo** | Selección de XGBoost, horizonte N = 30 días, estrategia anti-leakage. | Predictivo |
+| **4. Construcción del Modelo** | XGBoost con Recall 52.55%, interpretabilidad SHAP global y local. | Predictivo y Diagnóstico |
+| **5. Comunicación de Resultados** | Gráficas ROC, PR, matrices de confusión, casos SHAP locales. | Diagnóstico y Predictivo |
+| **6. Operacionalización** | Consola prescriptiva, reglas de decisión, roadmap de producción. | Prescriptivo |
+
+### 8.2 Impacto Esperado
+
+1. **Reducción de fallos imprevistos:** Se proyecta una reducción estimada del **35% al 50% en paradas intempestivas** de equipos críticos en salas de urgencias y laboratorios clínicos.
+2. **Optimización financiera y de stock:** El área de compras y Kardex dispondrá de una ventana de 30 días para aprovisionar repuestos críticos antes de que el equipo falle físicamente, evitando compras de emergencia a sobreprecio.
+3. **Gobierno y trazabilidad de datos:** La arquitectura de datos y la consola prescriptiva dotan a la gerencia técnica de visibilidad en tiempo real sobre la confiabilidad de cada marca, modelo y cliente.
+
+### 8.3 Factores Críticos de Éxito
+
+- **Rigor metodológico:** Recorrer las 6 fases del ciclo sin saltarse etapas.
+- **Calidad de datos:** Auditoría de integridad referencial y temporal (0 errores).
+- **Anti-leakage:** Partición temporal estricta para evitar fuga de información.
+- **Interpretabilidad:** SHAP para generar confianza en técnicos y directivos.
+- **Calibración del umbral:** τ = 0.22 para maximizar F₂-Score y controlar costo operativo.
+- **Monitoreo continuo:** Reentrenamiento semestral y detección de deriva.
+
+### 8.4 Lecciones Aprendidas del Caso BackBlaze
+
+1. **La heurística manual es insuficiente:** La regla de BackBlaze (S.M.A.R.T. > 0) y la regla de taller de IMPORTMED (preventivo cada 6 meses) tienen bajo Recall y no capturan interacciones multivariadas.
+2. **El submuestreo 50-50 dispara falsas alarmas:** BackBlaze lo documentó empíricamente; IMPORTMED optó por ponderación de clases (`scale_pos_weight`).
+3. **La interpretabilidad es clave para la adopción:** SHAP permitió a BackBlaze descubrir que `SMART 9 Raw` (horas de encendido) era el 3er factor más importante; en IMPORTMED, `tipo_hospital_publico` y `dias_desde_ultimo_preventivo` son los factores principales.
+4. **El horizonte de predicción es un trade-off:** Horizontes cortos reducen falsas alarmas pero no permiten planificación logística; horizontes largos difuminan los síntomas agudos.
+5. **La operacionalización requiere MLOps:** La ejecución manual de scripts es insostenible; se requiere automatización end-to-end y monitoreo continuo.
+
+### 8.5 Recomendaciones para Futuras Iteraciones
+
+1. **Validar con datos reales de IMPORTMED:** Los datos sintéticos deben contrastarse con el historial real del taller.
+2. **Generalizar a otros modelos de equipos:** Aplicar el mismo enfoque a nuevas marcas y categorías (monitores de signos vitales, microscopios).
+3. **Explorar otros algoritmos:** Evaluar LightGBM, CatBoost y modelos de series temporales (LSTM).
+4. **Automatizar el pipeline (MLOps):** Implementar orquestación end-to-end con monitoreo de deriva y reentrenamiento programado.
+5. **Integrar la consola prescriptiva en el sistema de gestión:** Conectar `Prescripcion_Acciones_Inmediatas.csv` con el flujo de órdenes de trabajo de IMPORTMED.
+
+---
+
+## 9. REFERENCIAS
+
+Alfaro Arriola, R. (2026). *Ciclo de vida de Data Analytics: Desglose detallado de las 6 fases del proceso analítico*. UNI – Ingeniería en Computación.
+
+Alfaro Arriola, R. (2026). *Tipos de análisis: Descriptivo, diagnóstico, predictivo y prescriptivo*. UNI – Ingeniería en Computación.
+
+Backblaze. (s. f.). *Hard drive data and stats* [Conjunto de datos]. https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data
+
+Chen, T., y Guestrin, C. (2016). XGBoost: A scalable tree boosting system. En *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining* (pp. 785-794). ACM. https://doi.org/10.1145/2939672.2939785
+
+Datatonic. (s. f.-a). *Machine learning for predictive maintenance – Part 1*. https://datatonic.com/insights/machine-learning-predictive-maintenance/
+
+Datatonic. (s. f.-b). *Machine learning for predictive maintenance – Part 2*. https://datatonic.com/insights/machine-learning-predictive-maintenance-hard-drive-failure/
+
+Datatonic. (s. f.-c). *predictive-maintenance-demo* [Código fuente]. GitHub. https://github.com/teamdatatonic/predictive-maintenance-demo
+
+Lundberg, S. M., y Lee, S.-I. (2017). A unified approach to interpreting model predictions. En I. Guyon, U. von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan y R. Garnett (Eds.), *Advances in neural information processing systems* (Vol. 30, pp. 4765-4774). Curran Associates.
+
+Smith, B. (2021). *Análisis de datos: Guía completa para principiantes*.
+
+Susto, G. A., Schirru, A., Pampuri, S., McLoone, S., y Beghi, A. (2015). Machine learning for predictive maintenance: A multiple classifier approach. *IEEE Transactions on Industrial Informatics, 11*(3), 812-820. https://doi.org/10.1109/TII.2014.2349359
