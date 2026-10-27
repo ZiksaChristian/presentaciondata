@@ -65,37 +65,45 @@ function buildNavigation() {
   const slideDots = document.getElementById('slide-dots');
   const activeData = getActiveData();
 
-  // Update sidebar section counter
-  const sidebarCountEl = document.querySelector('.sidebar-title span:last-child');
-  if (sidebarCountEl) {
-    sidebarCountEl.textContent = `${activeData.sections.length} SECCIONES`;
+  if (navList) {
+    const sidebarCountEl = document.querySelector('.sidebar-title span:last-child');
+    if (sidebarCountEl) {
+      sidebarCountEl.textContent = `${activeData.sections.length} SECCIONES`;
+    }
+    navList.innerHTML = '';
   }
   
-  navList.innerHTML = '';
-  slideDots.innerHTML = '';
+  if (slideDots) {
+    slideDots.innerHTML = '';
+  }
 
   activeData.sections.forEach((sec, idx) => {
-    // Sidebar Item
-    const navBtn = document.createElement('button');
-    navBtn.className = `nav-item ${idx === 0 ? 'active' : ''}`;
-    navBtn.id = `nav-item-${idx}`;
     const numDisplay = sec.index < 10 ? `0${sec.index}` : `${sec.index}`;
-    navBtn.innerHTML = `
-      <span class="nav-num">${numDisplay}</span>
-      <span class="nav-label">${sec.badge || sec.title}</span>
-    `;
-    navBtn.addEventListener('click', () => {
-      goToSection(idx);
-    });
-    navList.appendChild(navBtn);
 
-    // Slide Dot
-    const dot = document.createElement('div');
-    dot.className = `slide-dot ${idx === 0 ? 'active' : ''}`;
-    dot.id = `slide-dot-${idx}`;
-    dot.title = `${numDisplay}. ${sec.title}`;
-    dot.addEventListener('click', () => goToSection(idx));
-    slideDots.appendChild(dot);
+    // Sidebar Item (if sidebar element is present in DOM)
+    if (navList) {
+      const navBtn = document.createElement('button');
+      navBtn.className = `nav-item ${idx === 0 ? 'active' : ''}`;
+      navBtn.id = `nav-item-${idx}`;
+      navBtn.innerHTML = `
+        <span class="nav-num">${numDisplay}</span>
+        <span class="nav-label">${sec.badge || sec.title}</span>
+      `;
+      navBtn.addEventListener('click', () => {
+        goToSection(idx);
+      });
+      navList.appendChild(navBtn);
+    }
+
+    // Slide Dot in footer
+    if (slideDots) {
+      const dot = document.createElement('div');
+      dot.className = `slide-dot ${idx === 0 ? 'active' : ''}`;
+      dot.id = `slide-dot-${idx}`;
+      dot.title = `${numDisplay}. ${sec.title}`;
+      dot.addEventListener('click', () => goToSection(idx));
+      slideDots.appendChild(dot);
+    }
   });
 }
 
@@ -145,13 +153,13 @@ function buildGlossary() {
         <div class="term-def">${escapeHtml(item.definition)}</div>
         
         ${item.tooltip_context ? `
-          <div style="background:rgba(249,115,22,0.1); border-left:3px solid var(--accent-orange); padding:8px 10px; border-radius:4px; margin-top:10px; font-size:12px; color:#fed7aa; line-height:1.45;">
+          <div style="background:#fff7ed; border:1px solid #fed7aa; border-left:3px solid var(--accent-orange); padding:8px 10px; border-radius:4px; margin-top:10px; font-size:12px; color:#7c2d12; line-height:1.45; font-weight:500;">
             <strong style="color:var(--accent-orange);">\u26A1 \u00BFC\u00F3mo se aplica en este proyecto?:</strong> ${escapeHtml(item.tooltip_context)}
           </div>
         ` : ''}
 
         ${item.practical_analogy ? `
-          <div style="background:rgba(16,185,129,0.08); border-left:3px solid var(--accent-emerald); padding:8px 10px; border-radius:4px; margin-top:8px; font-size:11.5px; color:#a7f3d0; line-height:1.45;">
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:3px solid var(--accent-emerald); padding:8px 10px; border-radius:4px; margin-top:8px; font-size:11.5px; color:#064e3b; line-height:1.45; font-weight:500;">
             <strong style="color:var(--accent-emerald);">\uD83D\uDCA1 Analog\u00EDa cotidiana:</strong> ${escapeHtml(item.practical_analogy)}
           </div>
         ` : ''}
@@ -381,7 +389,7 @@ function renderSection1(sec) {
     <!-- Tabla 1: Comparativa de Estrategias -->
     <div class="glass-card" style="margin-top:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-        <h3 style="font-size:16px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span>\uD83D\uDCCB</span> ${sec.table1.title}
         </h3>
         <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
@@ -395,12 +403,12 @@ function renderSection1(sec) {
             <span class="strat-tag" style="background:${strat.color}22; color:${strat.color}; border:1px solid ${strat.color}55;">
               ${strat.tag}
             </span>
-            <h4 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:8px;">${strat.name}</h4>
+            <h4 style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:8px;">${strat.name}</h4>
             <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">${linkifyTerms(strat.principle)}</p>
             
             <div style="font-size:12px; margin-bottom:8px;">
               <span style="color:#ef4444; font-weight:700;">El Gran Peligro:</span>
-              <div style="color:#cbd5e1; font-size:12px; margin-top:2px;">${linkifyTerms(strat.cons)}</div>
+              <div style="color:#000000; font-size:12.5px; margin-top:2px; font-weight:500;">${linkifyTerms(strat.cons)}</div>
             </div>
 
             <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
@@ -416,7 +424,7 @@ function renderSection1(sec) {
     <div class="sim-slider-container">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
         <div>
-          <h3 style="font-size:16px; font-weight:700; color:#fff;">
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
             <span>\uD83C\uDF9A\uFE0F</span> ${s.title}
           </h3>
           <p style="font-size:12px; color:var(--text-muted);">
@@ -438,14 +446,14 @@ function renderSection1(sec) {
             <span style="font-size:11px; font-weight:700; color:#ef4444; font-family:var(--font-mono); text-transform:uppercase;">
               ${s.before.label}
             </span>
-            <span style="font-size:11px; padding:2px 8px; border-radius:10px; background:#ef444433; color:#fca5a5; font-weight:700;">
+            <span style="font-size:11px; padding:2px 8px; border-radius:10px; background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; font-weight:700;">
               ${s.before.status}
             </span>
           </div>
           <div style="font-size:26px; font-weight:800; color:#ef4444; font-family:var(--font-mono); margin-bottom:6px;" id="reactive-cost">
             ${s.before.cost}
           </div>
-          <div style="font-size:12.5px; color:#cbd5e1; margin-bottom:8px;">${s.before.subtitle}</div>
+          <div style="font-size:12.5px; color:#000000; margin-bottom:8px; font-weight:500;">${s.before.subtitle}</div>
           <ul style="font-size:12px; color:var(--text-muted); list-style:none; display:flex; flex-direction:column; gap:6px;">
             <li>\u23F1\uFE0F <strong>Downtime (tiempo fuera):</strong> ${s.before.downtime}</li>
             <li>\u26A1 <strong>Impacto en I/O (disco):</strong> ${s.before.ioImpact}</li>
@@ -466,7 +474,7 @@ function renderSection1(sec) {
           <div style="font-size:26px; font-weight:800; color:var(--accent-cyan-glow); font-family:var(--font-mono); margin-bottom:6px;" id="predictive-cost">
             ${s.after.cost}
           </div>
-          <div style="font-size:12.5px; color:#cbd5e1; margin-bottom:8px;">${s.after.subtitle}</div>
+          <div style="font-size:12.5px; color:#000000; margin-bottom:8px; font-weight:500;">${s.after.subtitle}</div>
           <ul style="font-size:12px; color:var(--text-muted); list-style:none; display:flex; flex-direction:column; gap:6px;">
             <li>\u23F1\uFE0F <strong>Downtime (tiempo fuera):</strong> ${s.after.downtime}</li>
             <li>\u26A1 <strong>Impacto en I/O (disco):</strong> ${s.after.ioImpact}</li>
@@ -508,8 +516,8 @@ function renderSection2(sec) {
               <div class="step-question"><strong>Pregunta central:</strong> ${l.question}</div>
               
               <div class="step-expanded-details" id="step-detail-${l.level}" style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-subtle); display:${isVisited ? 'block' : 'none'};">
-                <p style="font-size:13px; color:#cbd5e1; margin-bottom:8px; line-height:1.5;">${linkifyTerms(l.detail)}</p>
-                <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px 14px; font-size:12px; margin-bottom:8px;">
+                <p style="font-size:13px; color:#000000; margin-bottom:8px; line-height:1.5;">${linkifyTerms(l.detail)}</p>
+                <div style="background:var(--bg-secondary); border-radius:6px; padding:10px 14px; font-size:12px; margin-bottom:8px;">
                   <strong style="color:var(--accent-cyan);">En el caso real de Backblaze:</strong> ${linkifyTerms(l.example)}
                 </div>
                 <div style="font-size:11.5px; color:var(--text-dim); font-family:var(--font-mono);">
@@ -526,7 +534,7 @@ function renderSection2(sec) {
     </div>
 
     <div class="glass-card" style="margin-top:24px; border-left:3px solid var(--accent-orange);">
-      <h4 style="font-size:14px; font-weight:700; color:#fff; margin-bottom:6px;">
+      <h4 style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:6px;">
         \uD83D\uDCA1 Lecci\u00F3n de Negocios para no cometer errores
       </h4>
       <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5;">
@@ -606,10 +614,10 @@ function renderSection3(sec) {
   return `
     <!-- Explicaci\u00F3n de la limitaci\u00F3n humana vs Machine Learning -->
     <div class="glass-card" style="margin-bottom:20px; border-left:3px solid var(--accent-cyan); background:rgba(6,182,212,0.06);">
-      <h4 style="font-size:14.5px; font-weight:700; color:#fff; margin-bottom:6px;">
+      <h4 style="font-size:14.5px; font-weight:700; color:var(--text-main); margin-bottom:6px;">
         \uD83E\uDDE0 ${sec.humanLimitation.title}
       </h4>
-      <p style="font-size:13px; color:#cbd5e1; line-height:1.55;">
+      <p style="font-size:13px; color:#000000; line-height:1.55;">
         ${linkifyTerms(sec.humanLimitation.text)}
       </p>
     </div>
@@ -622,7 +630,7 @@ function renderSection3(sec) {
             <span style="font-size:11px; font-weight:700; color:${v.color}; font-family:var(--font-mono); text-transform:uppercase;">
               ${v.v}
             </span>
-            <span style="font-size:13px; font-weight:800; color:#fff; font-family:var(--font-mono);">
+            <span style="font-size:13px; font-weight:800; color:var(--text-main); font-family:var(--font-mono);">
               ${v.stat}
             </span>
           </div>
@@ -635,7 +643,7 @@ function renderSection3(sec) {
     <div class="growth-chart-container">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
         <div>
-          <h3 style="font-size:16px; font-weight:700; color:#fff;">
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
             <span>\uD83D\uDCCA</span> ${g.title}
           </h3>
           <p style="font-size:12px; color:var(--text-muted);">${g.subtitle}</p>
@@ -670,10 +678,10 @@ function renderSection3(sec) {
       </div>
 
       <!-- Year Detail Breakdown Box -->
-      <div style="margin-top:20px; padding:16px; background:rgba(0,0,0,0.3); border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;" id="growth-year-details">
+      <div style="margin-top:20px; padding:16px; background:var(--bg-secondary); border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;" id="growth-year-details">
         <div>
           <span style="font-size:11px; color:var(--accent-cyan); font-family:var(--font-mono); font-weight:700;">A\u00D1O SELECCIONADO: ${currentData.year}</span>
-          <div style="font-size:14px; font-weight:700; color:#fff; margin-top:2px;">
+          <div style="font-size:14px; font-weight:700; color:var(--text-main); margin-top:2px;">
             ${currentData.attributes} Atributos S.M.A.R.T. distintos &bull; ${currentData.columns} Columnas Totales
           </div>
           <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
@@ -681,11 +689,11 @@ function renderSection3(sec) {
           </div>
         </div>
         <div style="display:flex; gap:12px;">
-          <div style="background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:6px; text-align:center;">
+          <div style="background:var(--bg-secondary); padding:8px 12px; border-radius:6px; text-align:center;">
             <div style="font-size:11px; color:var(--text-dim);">Atributos</div>
             <div style="font-size:18px; font-weight:800; color:var(--accent-cyan); font-family:var(--font-mono);">${currentData.attributes}</div>
           </div>
-          <div style="background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:6px; text-align:center;">
+          <div style="background:var(--bg-secondary); padding:8px 12px; border-radius:6px; text-align:center;">
             <div style="font-size:11px; color:var(--text-dim);">Columnas (Raw+Norm)</div>
             <div style="font-size:18px; font-weight:800; color:var(--accent-orange); font-family:var(--font-mono);">${currentData.columns}</div>
           </div>
@@ -695,12 +703,12 @@ function renderSection3(sec) {
 
     <!-- Explicador S.M.A.R.T. (Tooltips e Informaci\u00F3n Clave) -->
     <div class="glass-card" style="margin-top:24px;">
-      <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:12px;">
+      <h3 style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:12px;">
         \uD83D\uDD0D ${sec.smartExplanation.title}
       </h3>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
         ${sec.smartExplanation.concepts.map(c => `
-          <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:14px;">
+          <div style="background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:14px;">
             <div style="font-size:13px; font-weight:700; color:var(--accent-cyan); margin-bottom:6px;">${linkifyTerms(c.term)}</div>
             <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">${linkifyTerms(c.explanation)}</p>
           </div>
@@ -733,7 +741,7 @@ window.selectGrowthYear = function(index) {
     detailBox.innerHTML = `
       <div>
         <span style="font-size:11px; color:var(--accent-cyan); font-family:var(--font-mono); font-weight:700;">A\u00D1O SELECCIONADO: ${currentData.year}</span>
-        <div style="font-size:14px; font-weight:700; color:#fff; margin-top:2px;">
+        <div style="font-size:14px; font-weight:700; color:var(--text-main); margin-top:2px;">
           ${currentData.attributes} Atributos S.M.A.R.T. distintos &bull; ${currentData.columns} Columnas Totales
         </div>
         <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
@@ -741,11 +749,11 @@ window.selectGrowthYear = function(index) {
         </div>
       </div>
       <div style="display:flex; gap:12px;">
-        <div style="background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:6px; text-align:center;">
+        <div style="background:var(--bg-secondary); padding:8px 12px; border-radius:6px; text-align:center;">
           <div style="font-size:11px; color:var(--text-dim);">Atributos</div>
           <div style="font-size:18px; font-weight:800; color:var(--accent-cyan); font-family:var(--font-mono);">${currentData.attributes}</div>
         </div>
-        <div style="background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:6px; text-align:center;">
+        <div style="background:var(--bg-secondary); padding:8px 12px; border-radius:6px; text-align:center;">
           <div style="font-size:11px; color:var(--text-dim);">Columnas (Raw+Norm)</div>
           <div style="font-size:18px; font-weight:800; color:var(--accent-orange); font-family:var(--font-mono);">${currentData.columns}</div>
         </div>
@@ -803,7 +811,7 @@ function renderSection4(sec) {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div style="display:flex; align-items:center; gap:10px;">
                 <span class="badge-tag" style="font-size:10px;">${p.tag}</span>
-                <h4 style="font-size:15px; font-weight:700; color:#fff;">${p.name}</h4>
+                <h4 style="font-size:15px; font-weight:700; color:var(--text-main);">${p.name}</h4>
               </div>
               <span style="font-size:11px; font-family:var(--font-mono); color:var(--accent-cyan); font-weight:600;">
                 ${p.metrics}
@@ -816,7 +824,7 @@ function renderSection4(sec) {
 
             <!-- Contenido Expandible (Script Viewer & Key Deliverable) -->
             <div class="timeline-phase-body" id="phase-body-${p.phase}" style="display:${idx === 0 ? 'block' : 'none'}; margin-top:14px; padding-top:12px; border-top:1px solid var(--border-subtle);">
-              <div style="font-size:12px; color:#cbd5e1; margin-bottom:10px;">
+              <div style="font-size:12px; color:#000000; margin-bottom:10px; font-weight:500;">
                 <strong style="color:var(--accent-emerald);">Entregable Clave:</strong> ${linkifyTerms(p.keyDeliverable)}
               </div>
 
@@ -887,10 +895,10 @@ function renderSection5(sec) {
   return `
     <!-- Met\u00E1fora de la ventana m\u00F3vil de 10 d\u00EDas -->
     <div class="glass-card" style="margin-bottom:20px; border-left:3px solid var(--accent-cyan); background:rgba(6,182,212,0.06);">
-      <h4 style="font-size:14.5px; font-weight:700; color:#fff; margin-bottom:6px;">
+      <h4 style="font-size:14.5px; font-weight:700; color:var(--text-main); margin-bottom:6px;">
         \uD83C\uDFAC ${sec.rollingWindowMetaphor.title}
       </h4>
-      <p style="font-size:13px; color:#cbd5e1; line-height:1.55;">
+      <p style="font-size:13px; color:#000000; line-height:1.55;">
         ${linkifyTerms(sec.rollingWindowMetaphor.quote)}
       </p>
     </div>
@@ -901,14 +909,14 @@ function renderSection5(sec) {
         <span style="font-size:11px; font-family:var(--font-mono); color:var(--accent-orange); font-weight:700; text-transform:uppercase;">
           Desbalance Extremo en Producci\u00F3n
         </span>
-        <div style="font-size:26px; font-weight:800; color:#fff; font-family:var(--font-mono); margin:4px 0;">
+        <div style="font-size:26px; font-weight:800; color:var(--text-main); font-family:var(--font-mono); margin:4px 0;">
           ${imb.ratio}
         </div>
         <div style="font-size:12px; color:var(--text-muted);">Discos Sanos vs Discos en Fallo</div>
       </div>
 
       <div class="glass-card">
-        <h4 style="font-size:14px; font-weight:700; color:#fff; margin-bottom:6px;">
+        <h4 style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:6px;">
           Por qu\u00E9 la Telemetr\u00EDa de un Solo D\u00EDa No Alcanza
         </h4>
         <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5;">
@@ -920,7 +928,7 @@ function renderSection5(sec) {
     <!-- Diagrama de Flujo Interactivo -->
     <div class="glass-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-        <h3 style="font-size:16px; font-weight:700; color:#fff;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
           <span>\uD83D\uDD04</span> Diagrama de Flujo del Pipeline de Datos
         </h3>
         <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
@@ -934,7 +942,7 @@ function renderSection5(sec) {
             <div style="font-size:11px; font-weight:700; color:var(--accent-cyan); font-family:var(--font-mono); margin-bottom:4px;">
               ETAPA 0${step.step}
             </div>
-            <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:2px;">
+            <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:2px;">
               ${step.title}
             </div>
             <div style="font-size:11px; color:var(--text-dim);">${step.subtitle}</div>
@@ -944,19 +952,19 @@ function renderSection5(sec) {
       </div>
 
       <!-- Detalle de la Etapa Seleccionada -->
-      <div style="margin-top:20px; padding:18px; background:rgba(0,0,0,0.3); border-radius:var(--radius-md); border:1px solid var(--border-subtle);" id="flow-step-detail">
+      <div style="margin-top:20px; padding:18px; background:var(--bg-secondary); border-radius:var(--radius-md); border:1px solid var(--border-subtle);" id="flow-step-detail">
         <!-- Injected dynamically -->
       </div>
     </div>
 
     <!-- Detalle de las 5 Agregaciones en Ventana de 10 D\u00EDas -->
     <div class="glass-card" style="margin-top:24px;">
-      <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:12px;">
+      <h3 style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:12px;">
         \u23F1\uFE0F Funciones de Ventanas M\u00F3viles de 10 D\u00EDas (${w.windowSize})
       </h3>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;">
         ${w.aggregations.map(a => `
-          <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:12px 14px;">
+          <div style="background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:12px 14px;">
             <div style="font-size:13px; font-weight:700; color:var(--accent-cyan); font-family:var(--font-mono); margin-bottom:4px;">
               ${a.func}
             </div>
@@ -991,11 +999,11 @@ window.selectFlowStep = function(stepNum) {
       <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
         <div>
           <span style="font-size:11px; font-weight:700; color:var(--accent-cyan); font-family:var(--font-mono);">ETAPA SELECCIONADA: 0${step.step}</span>
-          <h4 style="font-size:16px; font-weight:700; color:#fff; margin-top:2px;">${step.title} &bull; ${step.subtitle}</h4>
-          <p style="font-size:13px; color:#cbd5e1; margin-top:6px; line-height:1.5;">${linkifyTerms(step.desc)}</p>
+          <h4 style="font-size:16px; font-weight:700; color:var(--text-main); margin-top:2px;">${step.title} &bull; ${step.subtitle}</h4>
+          <p style="font-size:13px; color:#000000; margin-top:6px; line-height:1.5;">${linkifyTerms(step.desc)}</p>
         </div>
       </div>
-      <div style="margin-top:12px; background:#050811; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:12px; font-family:var(--font-mono); font-size:12px; color:var(--accent-cyan-glow); overflow-x:auto;">
+      <div style="margin-top:12px; background:#f8fafc; border:1px solid var(--border-subtle); border-radius:6px; padding:12px; font-family:var(--font-mono); font-size:12px; color:var(--accent-cyan-glow); overflow-x:auto;">
         ${escapeHtml(step.sqlExample)}
       </div>
     `;
@@ -1013,7 +1021,7 @@ function renderSection6(sec) {
     <div class="formula-showcase-container">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
         <div>
-          <h3 style="font-size:16px; font-weight:700; color:#fff;">
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
             <span>\uD83D\uDCD0</span> Las 3 F\u00F3rmulas Matem\u00E1ticas que Hacen Funcionar el Modelo
           </h3>
           <p style="font-size:12px; color:var(--text-muted);">
@@ -1041,7 +1049,7 @@ function renderSection6(sec) {
     <div class="glass-card" style="margin-top:24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
         <div>
-          <h3 style="font-size:16px; font-weight:700; color:#fff;">
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
             <span>\uD83C\uDFC6</span> ${sec.table7.title}
           </h3>
           <p style="font-size:12px; color:var(--text-muted);">${sec.table7.subtitle}</p>
@@ -1102,7 +1110,7 @@ window.selectFormulaTab = function(idx) {
     card.innerHTML = `
       <div class="formula-display-card">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <h4 style="font-size:15px; font-weight:700; color:#fff;">${form.title}</h4>
+          <h4 style="font-size:15px; font-weight:700; color:var(--text-main);">${form.title}</h4>
           <span class="badge-tag" style="background:${form.color}22; color:${form.color}; border-color:${form.color}66; font-size:10px;">
             ${form.badge}
           </span>
@@ -1165,7 +1173,7 @@ function renderTournamentDiagnosis() {
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:18px;">\uD83D\uDD0E</span>
-          <h4 style="font-size:15px; font-weight:800; color:#fff;">
+          <h4 style="font-size:15px; font-weight:800; color:var(--text-main);">
             ${row.diagnosisTitle || ('Diagn\u00F3stico: ' + row.model)}
           </h4>
         </div>
@@ -1173,7 +1181,7 @@ function renderTournamentDiagnosis() {
           F2: ${row.f2.toFixed(3)} | Recall: ${row.recall.toFixed(1)}% | Alarmas: ${row.falseAlarms}
         </span>
       </div>
-      <p style="font-size:13.5px; color:#e2e8f0; line-height:1.55;">
+      <p style="font-size:13.5px; color:#000000; line-height:1.55;">
         ${linkifyTerms(row.diagnosisText || row.evaluation)}
       </p>
     </div>
@@ -1209,9 +1217,9 @@ function renderTournamentRows() {
       <tr class="${isXGB ? 'xgb-row-hover' : ''} ${r.isOptimal ? 'winner-row' : ''} ${isDiagnosed ? 'active-diagnosed-row' : ''}" 
           onclick="selectTournamentRow('${r.id}')"
           title="Haz clic para ver el an\u00E1lisis a fondo de este algoritmo"
-          style="border-bottom:1px solid rgba(255,255,255,0.05); transition:all 0.2s ease;">
+          style="border-bottom:1px solid var(--border-subtle); transition:all 0.2s ease;">
         <td style="padding:12px;">
-          <div style="font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+          <div style="font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:6px;">
             ${isDiagnosed ? '<span style="color:var(--accent-cyan); font-size:11px;">\uD83D\uDC49</span>' : ''}
             ${r.model}
           </div>
@@ -1220,7 +1228,7 @@ function renderTournamentRows() {
         <td style="padding:12px; text-align:center; font-family:var(--font-mono); color:${r.missed > 100 ? '#ef4444' : '#fca5a5'}; font-weight:700;">
           ${r.missed}
         </td>
-        <td style="padding:12px; text-align:center; font-family:var(--font-mono); color:${r.detected > 50 ? '#34d399' : '#94a3b8'}; font-weight:700;">
+        <td style="padding:12px; text-align:center; font-family:var(--font-mono); color:${r.detected > 50 ? '#047857' : '#000000'}; font-weight:700;">
           ${r.detected}
         </td>
         <td style="padding:12px; text-align:center; font-family:var(--font-mono); color:${r.falseAlarms > 200 ? '#ef4444' : 'var(--accent-cyan)'}; font-weight:700;">
@@ -1287,7 +1295,7 @@ function renderSection7(sec) {
     <div class="shap-chart-wrapper">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
         <div>
-          <h3 style="font-size:16px; font-weight:700; color:#fff;">
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
             <span>\uD83D\uDD2C</span> ${f.title}
           </h3>
           <p style="font-size:12px; color:var(--text-muted);">${f.subtitle}</p>
@@ -1319,7 +1327,7 @@ function renderSection7(sec) {
       </div>
 
       <!-- Feature Decision Details Box -->
-      <div style="margin-top:20px; padding:16px; background:rgba(0,0,0,0.3); border-radius:var(--radius-md); border:1px solid var(--border-subtle);" id="shap-detail-box">
+      <div style="margin-top:20px; padding:16px; background:var(--bg-secondary); border-radius:var(--radius-md); border:1px solid var(--border-subtle);" id="shap-detail-box">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
           <span style="font-size:11px; font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan); text-transform:uppercase;">
             HALLAZGO CR\u00CDTICO SELECCIONADO
@@ -1328,7 +1336,7 @@ function renderSection7(sec) {
             SMART 9 Raw (3er Lugar)
           </span>
         </div>
-        <p style="font-size:13px; color:#cbd5e1; line-height:1.5;" id="shap-detail-text">
+        <p style="font-size:13px; color:#000000; line-height:1.5;" id="shap-detail-text">
           Pasa el cursor sobre cualquiera de las barras para ver la justificaci\u00F3n f\u00EDsica de por qu\u00E9 el modelo tom\u00F3 esa decisi\u00F3n. El atributo <strong>SMART 9 Raw (Horas de Encendido)</strong> prueba que XGBoost contextualiza los errores seg\u00FAn la fatiga del disco: 10 errores en un disco viejo son letales, mientras que en uno nuevo pueden tolerarse m\u00E1s tiempo.
         </p>
       </div>
@@ -1380,12 +1388,12 @@ function renderSection8(sec) {
 
     <!-- Tabla 8: Hoja de Ruta hacia Producci\u00F3n (4 Pilares) -->
     <div class="glass-card" style="margin-top:28px;">
-      <h3 style="font-size:16px; font-weight:700; color:#fff; margin-bottom:16px;">
+      <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:16px;">
         <span>\uD83D\uDE80</span> ${sec.table8.title}
       </h3>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px;">
         ${sec.table8.pillars.map(p => `
-          <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:18px; border-top:3px solid ${p.color};">
+          <div style="background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:18px; border-top:3px solid ${p.color};">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <span style="font-size:11px; font-weight:700; color:${p.color}; font-family:var(--font-mono); text-transform:uppercase;">
                 PILAR 0${p.pillar} &bull; ${p.tag}
@@ -1394,11 +1402,11 @@ function renderSection8(sec) {
                 Fase 2
               </span>
             </div>
-            <h4 style="font-size:14.5px; font-weight:700; color:#fff; margin-bottom:8px;">${p.name}</h4>
+            <h4 style="font-size:14.5px; font-weight:700; color:var(--text-main); margin-bottom:8px;">${p.name}</h4>
             <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
-              <strong style="color:#94a3b8;">Estado Actual:</strong> ${p.current}
+              <strong style="color:#000000;">Estado Actual:</strong> ${p.current}
             </div>
-            <div style="font-size:12px; color:#cbd5e1; margin-bottom:10px; line-height:1.4;">
+            <div style="font-size:12px; color:#000000; margin-bottom:10px; line-height:1.4;">
               <strong style="color:${p.color};">Paso a Producci\u00F3n:</strong> ${linkifyTerms(p.production)}
             </div>
             <div style="padding-top:8px; border-top:1px solid var(--border-subtle); font-size:11.5px; color:var(--text-dim); font-family:var(--font-mono);">
@@ -1451,9 +1459,13 @@ window.goToSection = function(idx) {
   if (idx < 0 || idx >= activeSections.length) return;
   currentSectionIdx = idx;
 
-  // Update hash
+  // Update hash safely
   const sec = activeSections[idx];
-  window.history.replaceState(null, null, `#${sec.id}`);
+  if (window.history && window.history.replaceState) {
+    try {
+      window.history.replaceState(null, null, `#${sec.id}`);
+    } catch (e) {}
+  }
 
   // View Mode: Slides vs Continuous
   if (!isContinuousMode) {
@@ -1464,7 +1476,9 @@ window.goToSection = function(idx) {
         el.classList.remove('active');
       }
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   } else {
     const targetEl = document.getElementById(`section-${sec.id}`);
     if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1482,12 +1496,14 @@ window.goToSection = function(idx) {
     else dot.classList.remove('active');
   });
 
-  // Update footer counter & buttons
+  // Update footer counter, title label & buttons
   const counter = document.getElementById('slide-counter');
+  const titleLabel = document.getElementById('slide-title-label');
   const totalSecs = activeSections.length;
   const curDisplay = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
   const totDisplay = totalSecs < 10 ? `0${totalSecs}` : `${totalSecs}`;
   if (counter) counter.textContent = `${curDisplay} / ${totDisplay}`;
+  if (titleLabel) titleLabel.textContent = `• ${sec.badge || sec.title}`;
 
   const btnPrev = document.getElementById('btn-prev');
   const btnNext = document.getElementById('btn-next');
@@ -1532,40 +1548,27 @@ window.switchCase = function(caseId) {
   const headerBadges = document.getElementById('header-badges');
 
   if (caseId === 'importmed') {
-    if (headerTitle) headerTitle.textContent = "IMPORTMED S.A. | Mantenimiento Predictivo Biom\u00E9dico";
-    if (headerSubtitle) headerSubtitle.textContent = "UNIVERSIDAD NACIONAL DE INGENIER\u00CDA (UNI) \u2022 229 EQUIPOS \u2022 17 HOSPITALES";
+    if (headerTitle) headerTitle.textContent = "IMPORTMED S.A. | Mantenimiento Predictivo";
+    if (headerSubtitle) headerSubtitle.textContent = "UNIVERSIDAD NACIONAL DE INGENIERÍA (UNI) • 229 EQUIPOS • 17 HOSPITALES";
     if (brandLogo) {
       brandLogo.style.background = 'linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald))';
       brandLogo.innerHTML = `
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
         </svg>
       `;
     }
     if (headerBadges) {
-      headerBadges.innerHTML = `
-        <span class="badge-tag" title="M\u00E9trica rectora de evaluaci\u00F3n cl\u00EDnica">
-          <span style="width:7px; height:7px; border-radius:50%; background:#10b981; display:inline-block; box-shadow:0 0 10px #10b981;"></span>
-          XGBoost F2 = 0.4735
-        </span>
-        <span class="badge-tag" title="Factor de protecci\u00F3n financiera">
-          <span style="width:7px; height:7px; border-radius:50%; background:#06b6d4; display:inline-block; box-shadow:0 0 10px #06b6d4;"></span>
-          Protecci\u00F3n 27.54x ($415k)
-        </span>
-        <span class="badge-tag badge-tag-alt" title="Parque biom\u00E9dico evaluado">
-          <span style="width:7px; height:7px; border-radius:50%; background:#f59e0b; display:inline-block; box-shadow:0 0 10px #f59e0b;"></span>
-          229 Equipos \u2022 17 Centros
-        </span>
-      `;
+      headerBadges.innerHTML = ``;
     }
-    showToast('Caso cargado: IMPORTMED S.A. (Parque Biom\u00E9dico)', 'success');
+    showToast('Caso cargado: IMPORTMED S.A. (Parque Biomédico)', 'success');
   } else {
-    if (headerTitle) headerTitle.textContent = "Backblaze Data Center | Mantenimiento Predictivo HDD";
-    if (headerSubtitle) headerSubtitle.textContent = "TELEMETR\u00CDA S.M.A.R.T. & MACHINE LEARNING \u2022 FLOTA ST4000DM000";
+    if (headerTitle) headerTitle.textContent = "Backblaze | Mantenimiento Predictivo HDD";
+    if (headerSubtitle) headerSubtitle.textContent = "TELEMETRÍA S.M.A.R.T. & MACHINE LEARNING • FLOTA ST4000DM000";
     if (brandLogo) {
       brandLogo.style.background = 'linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan))';
       brandLogo.innerHTML = `
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
           <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
           <line x1="6" y1="6" x2="6.01" y2="6"></line>
@@ -1574,18 +1577,9 @@ window.switchCase = function(caseId) {
       `;
     }
     if (headerBadges) {
-      headerBadges.innerHTML = `
-        <span class="badge-tag" title="M\u00E9trica campeona de evaluaci\u00F3n">
-          <span style="width:7px; height:7px; border-radius:50%; background:#06b6d4; display:inline-block; box-shadow:0 0 10px #06b6d4;"></span>
-          XGBoost F2 = 0.528
-        </span>
-        <span class="badge-tag badge-tag-alt" title="Conjunto independiente ciego">
-          <span style="width:7px; height:7px; border-radius:50%; background:#f97316; display:inline-block; box-shadow:0 0 10px #f97316;"></span>
-          165 Fallos Reales (test_2019)
-        </span>
-      `;
+      headerBadges.innerHTML = ``;
     }
-    showToast('Caso cargado: Centros de Datos Backblaze (HDDs)', 'info');
+    showToast('Caso cargado: Backblaze (Discos Duros)', 'info');
   }
 
   // Re-build navigation, glossary and sections
@@ -1679,38 +1673,7 @@ function setupEventListeners() {
     });
   }
 
-  // Autoplay Toggle
-  const btnAutoplay = document.getElementById('btn-autoplay');
-  if (btnAutoplay) {
-    btnAutoplay.addEventListener('click', () => {
-      if (autoplayTimer) {
-        clearInterval(autoplayTimer);
-        autoplayTimer = null;
-        btnAutoplay.classList.remove('active');
-        document.getElementById('autoplay-text').textContent = 'Auto (15s)';
-        document.getElementById('autoplay-icon').textContent = '\u25B6';
-        showToast('Reproducci\u00F3n autom\u00E1tica pausada', 'info');
-      } else {
-        btnAutoplay.classList.add('active');
-        autoplayRemaining = 15;
-        document.getElementById('autoplay-icon').textContent = '\u23F8';
-        document.getElementById('autoplay-text').textContent = `${autoplayRemaining}s`;
-        
-        autoplayTimer = setInterval(() => {
-          autoplayRemaining--;
-          document.getElementById('autoplay-text').textContent = `${autoplayRemaining}s`;
-          if (autoplayRemaining <= 0) {
-            autoplayRemaining = 15;
-            const activeSecs = getActiveData().sections;
-            let nextIdx = (currentSectionIdx + 1) % activeSecs.length;
-            goToSection(nextIdx);
-          }
-        }, 1000);
-
-        showToast('Reproducci\u00F3n autom\u00E1tica iniciada (15s por diapositiva)', 'info');
-      }
-    });
-  }
+  // Autoplay removed as requested
 
   // Glossary Drawer Buttons (header + sidebar)
   const btnGlossary = document.getElementById('btn-open-glossary');
@@ -1919,8 +1882,9 @@ function showToast(message, type = 'info') {
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateX(50px)';
-    toast.style.transition = 'all 0.3s ease';
-    setTimeout(() => toast.remove(), 300);
+    setTimeout(() => {
+      if (typeof toast.remove === 'function') toast.remove();
+    }, 300);
   }, 4000);
 }
 

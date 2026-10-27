@@ -27,7 +27,7 @@ window.renderImportmedSection1 = function(sec) {
           <div style="font-size:11px; font-family:var(--font-mono); color:var(--accent-emerald); font-weight:700; letter-spacing:1px; text-transform:uppercase;">
             ${escapeHtmlSafe(meta.institution)} \u2022 ${escapeHtmlSafe(meta.department)}
           </div>
-          <h3 style="font-size:18px; color:#fff; margin-top:4px; font-weight:800;">
+          <h3 style="font-size:18px; color:var(--text-main); margin-top:4px; font-weight:800;">
             ${escapeHtmlSafe(meta.title)}
           </h3>
           <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">
@@ -36,12 +36,12 @@ window.renderImportmedSection1 = function(sec) {
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">DOCENTE ASESOR</div>
-          <div style="font-size:13px; color:#fff; font-weight:700;">${escapeHtmlSafe(meta.advisor)}</div>
+          <div style="font-size:13px; color:var(--text-main); font-weight:700;">${escapeHtmlSafe(meta.advisor)}</div>
           <div style="font-size:11px; color:var(--accent-cyan); margin-top:2px;">${escapeHtmlSafe(meta.location)} \u2022 ${escapeHtmlSafe(meta.date)}</div>
         </div>
       </div>
       
-      <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08); display:flex; gap:16px; flex-wrap:wrap; font-size:12px;">
+      <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-subtle); display:flex; gap:16px; flex-wrap:wrap; font-size:12px;">
         <span style="color:var(--text-dim);">Autores:</span>
         ${meta.authors.map(a => `
           <span style="color:var(--text-main); font-weight:600;">
@@ -64,20 +64,20 @@ window.renderImportmedSection1 = function(sec) {
 
     <!-- Table: 3 Maintenance Strategies -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\u2699\uFE0F</span> Comparativa de los 3 Paradigmas de Mantenimiento en Electromedicina
       </h3>
       <div class="strategies-grid">
         ${sec.strategies.map(st => `
           <div class="strategy-card" style="border-top:3px solid ${st.color};">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-              <h4 style="font-size:14px; font-weight:700; color:#fff;">${escapeHtmlSafe(st.name)}</h4>
+              <h4 style="font-size:14px; font-weight:700; color:var(--text-main);">${escapeHtmlSafe(st.name)}</h4>
               <span class="badge-tag" style="background:${st.color}22; border-color:${st.color}; color:${st.color}; font-size:10px;">${escapeHtmlSafe(st.tag)}</span>
             </div>
             <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">${escapeHtmlSafe(st.principle)}</p>
-            <div style="font-size:11.5px; margin-bottom:6px;"><strong style="color:#ef4444;">\u274C Desventaja:</strong> <span style="color:var(--text-dim);">${escapeHtmlSafe(st.cons)}</span></div>
-            <div style="font-size:11.5px; margin-bottom:8px;"><strong style="color:#10b981;">\u2705 Beneficio:</strong> <span style="color:var(--text-dim);">${escapeHtmlSafe(st.pros)}</span></div>
-            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; font-size:11.5px; margin-top:8px;">
+            <div style="font-size:11.5px; margin-bottom:6px;"><strong style="color:#b91c1c;">\u274C Desventaja:</strong> <span style="color:#000000; font-weight:500;">${escapeHtmlSafe(st.cons)}</span></div>
+            <div style="font-size:11.5px; margin-bottom:8px;"><strong style="color:#047857;">\u2705 Beneficio:</strong> <span style="color:#000000; font-weight:500;">${escapeHtmlSafe(st.pros)}</span></div>
+            <div style="background:var(--bg-secondary); padding:8px 10px; border-radius:6px; font-size:11.5px; margin-top:8px;">
               <div><strong>Impacto Financiero:</strong> <span style="color:var(--text-main); font-weight:600;">${escapeHtmlSafe(st.costImpact)}</span></div>
               <div style="margin-top:2px;"><strong>Disponibilidad Asistencial:</strong> <span style="color:${st.color}; font-weight:600;">${escapeHtmlSafe(st.availability)}</span></div>
             </div>
@@ -89,10 +89,10 @@ window.renderImportmedSection1 = function(sec) {
     <!-- Interactive Clinical Simulator -->
     <div class="glass-card" style="border:1px solid rgba(16,185,129,0.3);">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-        <h3 style="font-size:16px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span>\uD83C\uDFE5</span> ${escapeHtmlSafe(sim.title)}
         </h3>
-        <span class="badge-tag" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#34d399;">SIMULADOR CL\u00CDNICO EN TIEMPO REAL</span>
+        <span class="badge-tag" style="background:#dcfce7; border-color:#86efac; color:#065f46; font-weight:700;">SIMULADOR CL\u00CDNICO EN TIEMPO REAL</span>
       </div>
 
       <div class="brigade-container">
@@ -100,11 +100,11 @@ window.renderImportmedSection1 = function(sec) {
         <div class="clinical-card" style="border-left:4px solid #ef4444; background:rgba(239,68,68,0.06);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <span style="font-weight:700; color:#ef4444; font-size:13px;">${escapeHtmlSafe(sim.reactive.label)}</span>
-            <span class="badge-tag" style="background:#ef444422; border-color:#ef4444; color:#fca5a5; font-size:10px;">${escapeHtmlSafe(sim.reactive.riskStatus)}</span>
+            <span class="badge-tag" style="background:#fee2e2; border-color:#fca5a5; color:#991b1b; font-size:10.5px; font-weight:700;">${escapeHtmlSafe(sim.reactive.riskStatus)}</span>
           </div>
-          <p style="font-size:13px; color:#fff; font-weight:600; margin-bottom:6px;">${escapeHtmlSafe(sim.reactive.scenario)}</p>
+          <p style="font-size:13px; color:var(--text-main); font-weight:600; margin-bottom:6px;">${escapeHtmlSafe(sim.reactive.scenario)}</p>
           <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px;">${escapeHtmlSafe(sim.reactive.consequence)}</p>
-          <div style="background:rgba(0,0,0,0.4); padding:10px 12px; border-radius:8px; font-size:12px; display:flex; flex-direction:column; gap:4px;">
+          <div style="background:var(--bg-secondary); padding:10px 12px; border-radius:8px; font-size:12px; display:flex; flex-direction:column; gap:4px;">
             <div>\u23F1\uFE0F <strong>Tiempo de Parada:</strong> <span style="color:#ef4444; font-weight:700;">${escapeHtmlSafe(sim.reactive.downtime)}</span></div>
             <div>\uD83D\uDCB8 <strong>Costo del Desastre:</strong> <span style="color:#ef4444; font-weight:700;">${escapeHtmlSafe(sim.reactive.repairCost)}</span></div>
           </div>
@@ -114,11 +114,11 @@ window.renderImportmedSection1 = function(sec) {
         <div class="clinical-card" style="border-left:4px solid #10b981; background:rgba(16,185,129,0.06);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <span style="font-weight:700; color:#10b981; font-size:13px;">${escapeHtmlSafe(sim.predictive.label)}</span>
-            <span class="badge-tag" style="background:#10b98122; border-color:#10b981; color:#a7f3d0; font-size:10px;">${escapeHtmlSafe(sim.predictive.riskStatus)}</span>
+            <span class="badge-tag" style="background:#dcfce7; border-color:#86efac; color:#065f46; font-size:10.5px; font-weight:700;">${escapeHtmlSafe(sim.predictive.riskStatus)}</span>
           </div>
-          <p style="font-size:13px; color:#fff; font-weight:600; margin-bottom:6px;">${escapeHtmlSafe(sim.predictive.scenario)}</p>
+          <p style="font-size:13px; color:var(--text-main); font-weight:600; margin-bottom:6px;">${escapeHtmlSafe(sim.predictive.scenario)}</p>
           <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px;">${escapeHtmlSafe(sim.predictive.consequence)}</p>
-          <div style="background:rgba(0,0,0,0.4); padding:10px 12px; border-radius:8px; font-size:12px; display:flex; flex-direction:column; gap:4px;">
+          <div style="background:var(--bg-secondary); padding:10px 12px; border-radius:8px; font-size:12px; display:flex; flex-direction:column; gap:4px;">
             <div>\u2705 <strong>Tiempo de Parada:</strong> <span style="color:#10b981; font-weight:700;">${escapeHtmlSafe(sim.predictive.downtime)}</span></div>
             <div>\uD83D\uDCB5 <strong>Inversi\u00F3n Preventiva:</strong> <span style="color:#10b981; font-weight:700;">${escapeHtmlSafe(sim.predictive.repairCost)}</span></div>
           </div>
@@ -137,7 +137,7 @@ window.renderImportmedSection2 = function(sec) {
   return `
     <!-- Gartner 4 Levels of Analytics -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDCCA</span> Los 4 Niveles de Madurez Anal\u00EDtica Aplicados al Parque Biom\u00E9dico
       </h3>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
@@ -152,7 +152,7 @@ window.renderImportmedSection2 = function(sec) {
               <span class="badge-tag" style="background:${ml.color}15; border-color:${ml.color}; color:${ml.color}; font-size:10px;">${escapeHtmlSafe(ml.question)}</span>
             </div>
             <p style="font-size:12.5px; color:var(--text-main); margin-bottom:12px; line-height:1.5;">${escapeHtmlSafe(ml.desc)}</p>
-            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; font-size:11.5px; color:var(--text-dim); font-family:var(--font-mono);">
+            <div style="background:var(--bg-secondary); padding:8px 10px; border-radius:6px; font-size:11.5px; color:var(--text-dim); font-family:var(--font-mono);">
               <strong style="color:var(--text-muted);">Herramientas:</strong> ${escapeHtmlSafe(ml.tools)}
             </div>
           </div>
@@ -162,7 +162,7 @@ window.renderImportmedSection2 = function(sec) {
 
     <!-- 6 Phases of Data Analytics Lifecycle -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-emerald); font-size:18px;">\uD83D\uDD04</span> El Ciclo de Vida de Data Analytics en 6 Fases (Prof. Roberto Alfaro Arriola)
       </h3>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
@@ -171,13 +171,13 @@ window.renderImportmedSection2 = function(sec) {
 
       <div style="display:flex; flex-direction:column; gap:12px;">
         ${sec.lifecyclePhases.map(ph => `
-          <div style="display:flex; gap:16px; align-items:flex-start; background:rgba(15,23,42,0.6); padding:14px 18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); transition:all 0.25s;">
+          <div style="display:flex; gap:16px; align-items:flex-start; background:var(--bg-secondary); padding:14px 18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); transition:all 0.25s;">
             <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan)); display:flex; align-items:center; justify-content:center; font-weight:800; color:#04070d; font-size:14px; flex-shrink:0;">
               0${ph.step}
             </div>
             <div style="flex:1;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <h4 style="font-size:14px; color:#fff; font-weight:700;">Fase ${ph.step}: ${escapeHtmlSafe(ph.name)}</h4>
+                <h4 style="font-size:14px; color:var(--text-main); font-weight:700;">Fase ${ph.step}: ${escapeHtmlSafe(ph.name)}</h4>
                 <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan); font-size:10.5px;">
                   Entregable: ${escapeHtmlSafe(ph.deliverable)}
                 </span>
@@ -200,7 +200,7 @@ window.renderImportmedSection3 = function(sec) {
   return `
     <!-- Top Summary Banner -->
     <div class="glass-card" style="margin-bottom:24px; border-left:4px solid var(--accent-cyan);">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:8px;">
         \uD83D\uDCE6 Transformaci\u00F3n Transaccional Masiva: M\u00E1s de 9,400 Registros en SQLite
       </h3>
       <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
@@ -215,7 +215,7 @@ window.renderImportmedSection3 = function(sec) {
       ${sec.dataEntities.map(de => `
         <div class="kpi-card">
           <div class="kpi-label"><code style="color:var(--accent-cyan); font-size:11px;">tabla: ${escapeHtmlSafe(de.table)}</code></div>
-          <div class="kpi-value" style="font-size:24px; color:#fff;">${escapeHtmlSafe(de.count.toString())}</div>
+          <div class="kpi-value" style="font-size:24px; color:var(--text-main);">${escapeHtmlSafe(de.count.toString())}</div>
           <div class="kpi-desc">${escapeHtmlSafe(de.role)}</div>
         </div>
       `).join('')}
@@ -223,7 +223,7 @@ window.renderImportmedSection3 = function(sec) {
 
     <!-- 3 Physical Laws of Deterioration -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-orange); font-size:18px;">\u26A1</span> Modelado F\u00EDsico de la Degradaci\u00F3n (Inyecci\u00F3n de Se\u00F1al Predictiva)
       </h3>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:18px;">
@@ -262,11 +262,11 @@ window.renderImportmedSection4 = function(sec) {
 
     <!-- Anti-Leakage Diagram -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-emerald); font-size:18px;">\uD83E\uDDF0</span> Metodolog\u00EDa de Ventanas M\u00F3viles con Causalidad Estricta (Anti-Leakage)
       </h3>
-      <div style="background:#090e1a; padding:18px; border-radius:var(--radius-md); font-family:var(--font-mono); font-size:12px; line-height:1.6; border:1px solid rgba(255,255,255,0.08); overflow-x:auto;">
-<span style="color:#64748b;">// ESQUEMA DE OBSERVACI\u00D3N LONGITUDINAL CADA 30 D\u00CDAS (2023 - 2026)</span>
+      <div style="background:#f8fafc; padding:18px; border-radius:var(--radius-md); font-family:var(--font-mono); font-size:12px; line-height:1.6; border:1px solid rgba(255,255,255,0.08); overflow-x:auto;">
+<span style="color:#000000; font-weight:700;">// ESQUEMA DE OBSERVACI\u00D3N LONGITUDINAL CADA 30 D\u00CDAS (2023 - 2026)</span>
 [==== RETROSPECCI\u00D3N HIST\u00D3RICA (Pasado: Eventos &lt; t) ====] <span style="color:var(--accent-cyan);">| CORTE (t) |</span> [== PROSPECCI\u00D3N OBJETIVO (Futuro: [t, t+30d]) ==]
 * Aver\u00EDas correctivas acumuladas previas              <span style="color:var(--accent-cyan);">|           |</span> --&gt; <strong style="color:var(--accent-emerald);">\u00BFOcurre aver\u00EDa en pr\u00F3ximos 30 d\u00EDas?</strong>
 * Ventanas m\u00F3viles \u00FAltimos 90 y 30 d\u00EDas                  <span style="color:var(--accent-cyan);">|           |</span>     <span style="color:#ef4444;">1 = Fallo</span> / <span style="color:#10b981;">0 = Operaci\u00F3n Normal</span>
@@ -277,17 +277,17 @@ window.renderImportmedSection4 = function(sec) {
 
     <!-- 5 Variable Blocks -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDCDA</span> Diccionario del Feature Store (30 Variables en 5 Bloques Tem\u00E1ticos)
       </h3>
       <div style="display:flex; flex-direction:column; gap:12px;">
         ${sec.variableBlocks.map(vb => `
-          <div style="background:rgba(15,23,42,0.6); padding:14px 18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+          <div style="background:var(--bg-secondary); padding:14px 18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <h4 style="font-size:13.5px; color:#fff; font-weight:700;">${escapeHtmlSafe(vb.name)}</h4>
+              <h4 style="font-size:13.5px; color:var(--text-main); font-weight:700;">${escapeHtmlSafe(vb.name)}</h4>
               <span style="font-size:11.5px; color:var(--accent-cyan); font-family:var(--font-mono);">${escapeHtmlSafe(vb.importance)}</span>
             </div>
-            <div style="margin-top:6px; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); background:rgba(0,0,0,0.3); padding:6px 10px; border-radius:4px;">
+            <div style="margin-top:6px; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); background:var(--bg-secondary); padding:6px 10px; border-radius:4px;">
               ${escapeHtmlSafe(vb.vars)}
             </div>
           </div>
@@ -305,7 +305,7 @@ window.renderImportmedSection4 = function(sec) {
 window.renderImportmedSection5 = function(sec) {
   return `
     <div class="glass-card" style="margin-bottom:24px; border-left:4px solid var(--accent-emerald);">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:8px;">
         🧠 ¿Cómo Aprende el Algoritmo Campeón XGBoost en Electromedicina?
       </h3>
       <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
@@ -317,7 +317,7 @@ window.renderImportmedSection5 = function(sec) {
       ${sec.mathFoundations.map(mf => `
         <div class="glass-card" style="border:1px solid rgba(6,182,212,0.25);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <h4 style="font-size:15px; color:#fff; font-weight:700;">${escapeHtmlSafe(mf.title)}</h4>
+            <h4 style="font-size:15px; color:var(--text-main); font-weight:700;">${escapeHtmlSafe(mf.title)}</h4>
             <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan); font-size:11px;">FORMULACIÓN RIGUROSA</span>
           </div>
           
@@ -325,7 +325,7 @@ window.renderImportmedSection5 = function(sec) {
             ${window.renderMath ? window.renderMath(mf.latex, true) : `<code class="math-fallback">${escapeHtmlSafe(mf.latex)}</code>`}
           </div>
 
-          <p style="font-size:13.5px; color:#cbd5e1; line-height:1.65; margin-top:10px;">
+          <p style="font-size:13.5px; color:#000000; line-height:1.65; margin-top:10px;">
             ${window.renderMathInText ? window.renderMathInText(mf.explanation) : escapeHtmlSafe(mf.explanation)}
           </p>
         </div>
@@ -346,39 +346,39 @@ window.renderImportmedSection6 = function(sec) {
     <!-- Tournament Table -->
     <div class="glass-card" style="margin-bottom:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-        <h3 style="font-size:16px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span style="color:var(--accent-emerald); font-size:18px;">\uD83C\uDFC6</span> Evaluaci\u00F3n Comparativa sobre Test Ciego (3,435 Filas \u2022 196 Fallos Reales)
         </h3>
-        <span class="badge-tag" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#34d399;">XGBoost F2 = ${escapeHtmlSafe(cal.f2Max)}</span>
+        <span class="badge-tag" style="background:#dcfce7; border-color:#86efac; color:#065f46; font-weight:700;">XGBoost F2 = ${escapeHtmlSafe(cal.f2Max)}</span>
       </div>
 
       <div style="overflow-x:auto;">
         <table class="tournament-table" style="width:100%; border-collapse:collapse; font-size:12.5px;">
           <thead>
-            <tr style="border-bottom:1px solid var(--border-subtle); background:rgba(13,20,36,0.8); text-align:left;">
+            <tr style="border-bottom:1px solid var(--border-subtle); background:#f8fafc; text-align:left;">
               <th style="padding:10px 12px; color:var(--accent-cyan);">Modelo Evaluado</th>
               <th style="padding:10px 12px; color:var(--accent-emerald);">Recall (Sensibilidad)</th>
               <th style="padding:10px 12px; color:var(--text-muted);">Precisi\u00F3n</th>
-              <th style="padding:10px 12px; color:#c084fc;">F2-Score</th>
+              <th style="padding:10px 12px; color:#6b21a8; font-weight:800;">F2-Score</th>
               <th style="padding:10px 12px; color:var(--accent-orange);">ROC-AUC / PR-AUC</th>
-              <th style="padding:10px 12px; color:#fff;">Fallos Detectados</th>
+              <th style="padding:10px 12px; color:var(--text-main);">Fallos Detectados</th>
             </tr>
           </thead>
           <tbody>
             ${sec.tournamentTable.map((t, i) => `
-              <tr style="border-bottom:1px solid rgba(255,255,255,0.05); background:${i === 3 ? 'rgba(16,185,129,0.1)' : 'transparent'};">
-                <td style="padding:12px; font-weight:700; color:#fff;">
+              <tr style="border-bottom:1px solid var(--border-subtle); background:${i === 3 ? 'rgba(16,185,129,0.1)' : 'transparent'};">
+                <td style="padding:12px; font-weight:700; color:var(--text-main);">
                   ${escapeHtmlSafe(t.model)}
                   <div style="font-size:11px; color:var(--text-dim); font-weight:400;">${escapeHtmlSafe(t.paradigm)}</div>
                 </td>
                 <td style="padding:12px; color:var(--accent-emerald); font-weight:700; font-size:13.5px;">${escapeHtmlSafe(t.recall)}</td>
                 <td style="padding:12px; color:var(--text-muted);">${escapeHtmlSafe(t.precision)}</td>
-                <td style="padding:12px; color:#c084fc; font-weight:700;">${escapeHtmlSafe(t.f2)}</td>
+                <td style="padding:12px; color:#6b21a8; font-weight:800;">${escapeHtmlSafe(t.f2)}</td>
                 <td style="padding:12px; font-family:var(--font-mono); color:var(--accent-orange); font-size:11.5px;">
                   ROC: ${escapeHtmlSafe(t.rocAuc)} | PR: ${escapeHtmlSafe(t.prAuc)}
                 </td>
                 <td style="padding:12px;">
-                  <span class="badge-tag" style="background:${i === 3 ? '#10b98133' : '#ef444422'}; border-color:${i === 3 ? '#10b981' : '#ef4444'}; color:#fff; font-size:11px;">
+                  <span class="badge-tag" style="background:${i === 3 ? '#10b98133' : '#ef444422'}; border-color:${i === 3 ? '#10b981' : '#ef4444'}; color:var(--text-main); font-size:11px;">
                     ${escapeHtmlSafe(t.detected)}
                   </span>
                 </td>
@@ -388,14 +388,14 @@ window.renderImportmedSection6 = function(sec) {
         </table>
       </div>
 
-      <div style="background:rgba(6,182,212,0.08); border-left:3px solid var(--accent-cyan); padding:10px 14px; border-radius:4px; margin-top:14px; font-size:12px; color:#bae6fd;">
+      <div style="background:#e0f2fe; border:1px solid #bae6fd; border-left:3px solid #0284c7; padding:10px 14px; border-radius:6px; margin-top:14px; font-size:12.5px; color:#075985; font-weight:500;">
         <strong>Conclusión Técnica:</strong> ${window.renderMathInText ? window.renderMathInText("La regla heurística tradicional de taller de 180 días dejó escapar 171 fallos reales (87.24% de roturas imprevistas). XGBoost cuadriplica la captura alcanzando 103 fallos detectados con umbral calibrado $\\tau = 0.22$ y métrica $F_2$ ($\\beta = 2$).") : "La regla heurística tradicional de taller de 180 días dejó escapar 171 fallos reales (87.24% de roturas imprevistas). XGBoost cuadriplica la captura alcanzando 103 fallos detectados con umbral calibrado τ = 0.22 y métrica F2 (β = 2)."}
       </div>
     </div>
 
     <!-- Graphics Gallery (ROC, PR, Confusion, Trade-Off) with Lightbox Zoom -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDD2C</span> Galer\u00EDa de Evidencia Anal\u00EDtica: Gr\u00E1ficas de Rendimiento (Clic para Ampliar)
       </h3>
 
@@ -440,21 +440,21 @@ window.renderImportmedSection7 = function(sec) {
 
     <!-- SHAP Importance Ranking -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\uD83C\uDFC5</span> Ranking Global de Importancia de Variables (|SHAP Value| Promedio)
       </h3>
 
       <div style="display:flex; flex-direction:column; gap:10px;">
         ${sec.shapImportanceRanking.map(r => `
-          <div style="background:rgba(15,23,42,0.6); padding:12px 16px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="background:var(--bg-secondary); padding:12px 16px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
             <div style="display:flex; align-items:center; gap:12px;">
               <span style="font-family:var(--font-mono); font-size:12px; font-weight:800; color:var(--accent-cyan); width:28px;">#0${r.rank}</span>
               <div>
-                <div style="font-family:var(--font-mono); font-size:13px; font-weight:700; color:#fff;">${escapeHtmlSafe(r.feature)}</div>
+                <div style="font-family:var(--font-mono); font-size:13px; font-weight:700; color:var(--text-main);">${escapeHtmlSafe(r.feature)}</div>
                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${escapeHtmlSafe(r.desc)}</div>
               </div>
             </div>
-            <div class="badge-tag" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#34d399; font-size:12px;">
+            <div class="badge-tag" style="background:#dcfce7; border-color:#86efac; color:#065f46; font-size:12px; font-weight:700;">
               Impacto: ${escapeHtmlSafe(r.impact)}
             </div>
           </div>
@@ -464,7 +464,7 @@ window.renderImportmedSection7 = function(sec) {
 
     <!-- SHAP Visual Showcase Grid -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-emerald); font-size:18px;">\uD83D\uDD2C</span> Evidencia Visual SHAP (Barras, Dependencia y Beeswarm Summary)
       </h3>
 
@@ -499,47 +499,47 @@ window.renderImportmedSection8 = function(sec) {
     <div class="brigade-container" style="margin-bottom:28px;">
       ${sec.clinicalCases.map(c => `
         <div class="brigade-card" style="border-top:4px solid ${c.id === 'caso-rojo' ? '#ef4444' : '#10b981'};">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span class="badge-tag" style="background:${c.id === 'caso-rojo' ? '#ef444422' : '#10b98122'}; border-color:${c.id === 'caso-rojo' ? '#ef4444' : '#10b981'}; color:#fff; font-size:11px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span class="badge-tag" style="${c.id === 'caso-rojo' ? 'background:#fee2e2; border-color:#fca5a5; color:#991b1b;' : 'background:#dcfce7; border-color:#86efac; color:#065f46;'} font-weight:700; font-size:11px;">
               ${escapeHtmlSafe(c.status)}
             </span>
-            <span style="font-family:var(--font-mono); font-size:16px; font-weight:800; color:${c.id === 'caso-rojo' ? '#ef4444' : '#10b981'};">
+            <span style="font-family:var(--font-mono); font-size:16px; font-weight:800; color:${c.id === 'caso-rojo' ? '#dc2626' : '#059669'};">
               P = ${escapeHtmlSafe(c.prob)}
             </span>
           </div>
 
-          <h4 style="font-size:14.5px; color:#fff; font-weight:700; margin-bottom:4px;">${escapeHtmlSafe(c.equipment)}</h4>
-          <div style="font-size:12px; color:var(--accent-cyan); margin-bottom:14px;">\uD83C\uDFE5 ${escapeHtmlSafe(c.hospital)}</div>
+          <h4 style="font-size:15px; color:#000000; font-weight:700; margin-bottom:4px;">${escapeHtmlSafe(c.equipment)}</h4>
+          <div style="font-size:12px; color:#0284c7; font-weight:600; margin-bottom:14px;">\uD83C\uDFE5 ${escapeHtmlSafe(c.hospital)}</div>
 
           <!-- Forces List -->
-          <div style="font-size:11.5px; font-weight:700; color:#fff; margin-bottom:6px;">Factores que Empujan al Fallo (+):</div>
-          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+          <div style="font-size:12px; font-weight:700; color:#000000; margin-bottom:8px;">Factores que Empujan al Fallo (+):</div>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
             ${c.positiveForces.map(f => `
-              <div style="background:rgba(239,68,68,0.1); border-left:3px solid #ef4444; padding:6px 10px; border-radius:4px; font-size:11.5px;">
-                <div style="display:flex; justify-content:space-between;">
-                  <strong style="color:#fca5a5;">${escapeHtmlSafe(f.var)}</strong>
-                  <span style="color:#ef4444; font-weight:700; font-family:var(--font-mono);">${escapeHtmlSafe(f.push)}</span>
+              <div style="background:#fef2f2; border:1px solid #fecaca; border-left:3.5px solid #dc2626; padding:8px 12px; border-radius:6px; font-size:11.5px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:#991b1b; font-size:12px;">${escapeHtmlSafe(f.var)}</strong>
+                  <span style="color:#dc2626; font-weight:800; font-family:var(--font-mono); font-size:12px;">${escapeHtmlSafe(f.push)}</span>
                 </div>
-                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${escapeHtmlSafe(f.note)}</div>
+                <div style="font-size:11.5px; color:#334155; margin-top:3px; font-weight:500;">${escapeHtmlSafe(f.note)}</div>
               </div>
             `).join('')}
           </div>
 
-          <div style="font-size:11.5px; font-weight:700; color:#fff; margin-bottom:6px;">Factores Protectores (-):</div>
-          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+          <div style="font-size:12px; font-weight:700; color:#000000; margin-bottom:8px;">Factores Protectores (-):</div>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
             ${c.negativeForces.map(f => `
-              <div style="background:rgba(16,185,129,0.1); border-left:3px solid #10b981; padding:6px 10px; border-radius:4px; font-size:11.5px;">
-                <div style="display:flex; justify-content:space-between;">
-                  <strong style="color:#a7f3d0;">${escapeHtmlSafe(f.var)}</strong>
-                  <span style="color:#10b981; font-weight:700; font-family:var(--font-mono);">${escapeHtmlSafe(f.push)}</span>
+              <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:3.5px solid #059669; padding:8px 12px; border-radius:6px; font-size:11.5px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:#065f46; font-size:12px;">${escapeHtmlSafe(f.var)}</strong>
+                  <span style="color:#059669; font-weight:800; font-family:var(--font-mono); font-size:12px;">${escapeHtmlSafe(f.push)}</span>
                 </div>
-                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${escapeHtmlSafe(f.note)}</div>
+                <div style="font-size:11.5px; color:#334155; margin-top:3px; font-weight:500;">${escapeHtmlSafe(f.note)}</div>
               </div>
             `).join('')}
           </div>
 
-          <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:12px; border-top:1px solid rgba(255,255,255,0.06);">
-            <strong style="color:var(--accent-cyan);">Acci\u00F3n Mandatoria:</strong> ${escapeHtmlSafe(c.action)}
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-left:3.5px solid var(--accent-cyan); padding:10px 14px; border-radius:6px; font-size:12px; color:#000000; line-height:1.5;">
+            <strong style="color:#0284c7; font-weight:700;">Acci\u00F3n Mandatoria:</strong> ${escapeHtmlSafe(c.action)}
           </div>
         </div>
       `).join('')}
@@ -547,7 +547,7 @@ window.renderImportmedSection8 = function(sec) {
 
     <!-- Waterfall Graphic Showcase -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDD2C</span> Descomposici\u00F3n Local Gr\u00E1fica de Fuerzas SHAP (Waterfall Plot)
       </h3>
 
@@ -583,7 +583,7 @@ window.renderImportmedSection9 = function(sec) {
     <!-- Top Schema Diagram Banner -->
     <div class="glass-card" style="margin-bottom:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
-        <h3 style="font-size:16px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span style="color:var(--accent-cyan); font-size:18px;">\u2B50</span> Diagrama del Modelo Dimensional en Estrella en Power BI Desktop
         </h3>
         <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan);">9 ENTIDADES VERTIPAQ</span>
@@ -602,7 +602,7 @@ window.renderImportmedSection9 = function(sec) {
 
     <!-- 9 Entities Table -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px;">
         \uD83D\uDCCB Diccionario de las 9 Entidades Relacionales del Esquema en Estrella
       </h3>
       <div style="overflow-x:auto;">
@@ -619,7 +619,7 @@ window.renderImportmedSection9 = function(sec) {
           <tbody>
             ${sec.entities.map(e => `
               <tr>
-                <td style="font-weight:700; color:#fff; font-family:var(--font-mono);">${escapeHtmlSafe(e.name)}</td>
+                <td style="font-weight:700; color:var(--text-main); font-family:var(--font-mono);">${escapeHtmlSafe(e.name)}</td>
                 <td><span class="badge-tag" style="font-size:10.5px;">${escapeHtmlSafe(e.role)}</span></td>
                 <td style="font-family:var(--font-mono); color:var(--accent-cyan);">${escapeHtmlSafe(e.pk)}</td>
                 <td style="font-size:11.5px; color:var(--text-muted);">${escapeHtmlSafe(e.fk)}</td>
@@ -633,13 +633,13 @@ window.renderImportmedSection9 = function(sec) {
 
     <!-- DAX Challenge Box -->
     <div class="glass-card" style="border:1px solid rgba(16,185,129,0.3);">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:10px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-emerald);">\u26A1</span> ${escapeHtmlSafe(dax.title)}
       </h3>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">
         <strong>Problema Detectado:</strong> ${escapeHtmlSafe(dax.problem)}
       </p>
-      <p style="font-size:13px; color:#a7f3d0; margin-bottom:12px;">
+      <p style="font-size:13px; color:#065f46; font-weight:600; margin-bottom:12px;">
         <strong>Soluci\u00F3n en DAX:</strong> ${escapeHtmlSafe(dax.solution)}
       </p>
       <div class="dax-code-card">
@@ -659,7 +659,7 @@ window.renderImportmedSection10 = function(sec) {
     <!-- Power BI Page 1 Dashboard Showcase -->
     <div class="glass-card" style="margin-bottom:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
-        <h3 style="font-size:16px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDCCA</span> Vista Real del Cuadro de Mando: Torre de Control Ejecutiva (P\u00E1gina 1)
         </h3>
         <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan);">POWER BI DESKTOP</span>
@@ -678,14 +678,14 @@ window.renderImportmedSection10 = function(sec) {
 
     <!-- Findings Grid -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:16px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:16px;">
         \uD83D\uDD0E Hallazgos Macroecon\u00F3micos y Territoriales Revelados en la P\u00E1gina 1
       </h3>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:18px;">
         ${sec.findings.map(f => `
           <div class="clinical-card" style="border-top:3px solid var(--accent-cyan);">
-            <h4 style="font-size:14px; color:#fff; font-weight:700; margin-bottom:8px;">${escapeHtmlSafe(f.title)}</h4>
+            <h4 style="font-size:14px; color:var(--text-main); font-weight:700; margin-bottom:8px;">${escapeHtmlSafe(f.title)}</h4>
             <p style="font-size:12.5px; color:var(--text-muted); line-height:1.55;">${escapeHtmlSafe(f.desc)}</p>
           </div>
         `).join('')}
@@ -704,10 +704,10 @@ window.renderImportmedSection11 = function(sec) {
     <!-- Power BI Page 2 Dashboard Showcase -->
     <div class="glass-card" style="margin-bottom:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
-        <h3 style="font-size:16px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span style="color:var(--accent-emerald); font-size:18px;">\uD83D\uDD2C</span> Vista Real del Cuadro de Mando: Diagn\u00F3stico Causal y MTTR (P\u00E1gina 2)
         </h3>
-        <span class="badge-tag" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#34d399;">POWER BI DESKTOP</span>
+        <span class="badge-tag" style="background:#dcfce7; border-color:#86efac; color:#065f46; font-weight:700;">POWER BI DESKTOP</span>
       </div>
 
       <div class="graphic-thumb-wrapper" style="height:380px; border-radius:var(--radius-md);" onclick="openLightbox('${sec.graphicsGallery[0].src}', '${escapeHtmlSafe(sec.graphicsGallery[0].title)}', '${escapeHtmlSafe(sec.graphicsGallery[0].desc)}', 'POWER BI P\u00C1GINA 2')">
@@ -723,7 +723,7 @@ window.renderImportmedSection11 = function(sec) {
 
     <!-- Critical Low-Cost Components Table -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:#ef4444;">\u26A0\uFE0F</span> La Paradoja de los Repuestos Baratos con Paradas Desproporcionadas
       </h3>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
@@ -743,7 +743,7 @@ window.renderImportmedSection11 = function(sec) {
           <tbody>
             ${sec.criticalComponents.map(c => `
               <tr>
-                <td style="font-weight:700; color:#fff;">${escapeHtmlSafe(c.item)}</td>
+                <td style="font-weight:700; color:var(--text-main);">${escapeHtmlSafe(c.item)}</td>
                 <td style="font-family:var(--font-mono); color:var(--accent-emerald); font-weight:700;">${escapeHtmlSafe(c.cost)}</td>
                 <td style="font-family:var(--font-mono); color:#ef4444; font-weight:700;">${escapeHtmlSafe(c.downtime)}</td>
                 <td style="color:var(--text-muted);">${escapeHtmlSafe(c.impact)}</td>
@@ -756,13 +756,13 @@ window.renderImportmedSection11 = function(sec) {
 
     <!-- Causal Insights -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px;">
         \uD83D\uDCA1 Causas Ra\u00EDz y Din\u00E1mica del Deterioro T\u00E9cnico
       </h3>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:16px;">
         ${sec.causalInsights.map(ci => `
           <div class="clinical-card" style="border-top:3px solid var(--accent-orange);">
-            <h4 style="font-size:14px; color:#fff; font-weight:700; margin-bottom:8px;">${escapeHtmlSafe(ci.title)}</h4>
+            <h4 style="font-size:14px; color:var(--text-main); font-weight:700; margin-bottom:8px;">${escapeHtmlSafe(ci.title)}</h4>
             <p style="font-size:12.5px; color:var(--text-muted); line-height:1.55;">${escapeHtmlSafe(ci.desc)}</p>
           </div>
         `).join('')}
@@ -781,7 +781,7 @@ window.renderImportmedSection12 = function(sec) {
     <!-- Power BI Page 3 Dashboard Showcase -->
     <div class="glass-card" style="margin-bottom:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
-        <h3 style="font-size:16px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
           <span style="color:var(--accent-cyan); font-size:18px;">\uD83E\uDDD1\u200D\u2695\uFE0F</span> Vista Real del Cuadro de Mando: Consola Prescriptiva y Kardex (P\u00E1gina 3)
         </h3>
         <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan);">POWER BI DESKTOP</span>
@@ -811,7 +811,7 @@ window.renderImportmedSection12 = function(sec) {
 
     <!-- Logistic Brigades Optimizer -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDE91</span> Optimizador Log\u00EDstico: Despliegue en 2 Brigadas T\u00E9cnicas
       </h3>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
@@ -822,13 +822,13 @@ window.renderImportmedSection12 = function(sec) {
         ${sec.brigades.map(b => `
           <div class="brigade-card">
             <div class="brigade-header">
-              <span class="brigade-title">${escapeHtmlSafe(b.name)}</span>
-              <span class="brigade-badge">${escapeHtmlSafe(b.share)}</span>
+              <span class="brigade-title" style="color:#000000; font-weight:700;">${escapeHtmlSafe(b.name)}</span>
+              <span class="brigade-badge" style="background:#e0f2fe; border:1px solid #bae6fd; color:#0369a1; font-weight:700;">${escapeHtmlSafe(b.share)}</span>
             </div>
-            <div style="font-size:13px; color:#fff; font-weight:700; margin-bottom:6px;">${escapeHtmlSafe(b.teams.toString())} Equipos Cr\u00EDticos a Intervenir</div>
-            <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:10px;">\uD83C\uDFE5 <strong>Centros:</strong> ${escapeHtmlSafe(b.hospitals)}</p>
-            <div style="background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:6px; font-size:12px; color:var(--accent-cyan);">
-              \uD83D\uDDFA\uFE0F <strong>Plan Operativo:</strong> ${escapeHtmlSafe(b.logistics)}
+            <div style="font-size:13px; color:#000000; font-weight:700; margin-bottom:6px;">${escapeHtmlSafe(b.teams.toString())} Equipos Cr\u00EDticos a Intervenir</div>
+            <p style="font-size:12.5px; color:#1e293b; margin-bottom:10px; font-weight:500;">\uD83C\uDFE5 <strong>Centros:</strong> ${escapeHtmlSafe(b.hospitals)}</p>
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-left:3.5px solid #0284c7; padding:10px 14px; border-radius:6px; font-size:12px; color:#000000;">
+              \uD83D\uDDFA\uFE0F <strong style="color:#0284c7;">Plan Operativo:</strong> ${escapeHtmlSafe(b.logistics)}
             </div>
           </div>
         `).join('')}
@@ -837,7 +837,7 @@ window.renderImportmedSection12 = function(sec) {
 
     <!-- Kardex in Lines Warning Table -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:#ef4444; font-size:18px;">\uD83D\uDCE6</span> Monitoreo Kardex en L\u00EDneas: 5 SKUs en Zona de Convergencia Cr\u00EDtica
       </h3>
 
@@ -857,12 +857,12 @@ window.renderImportmedSection12 = function(sec) {
             ${sec.criticalSkus.map(s => `
               <tr>
                 <td style="font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan);">${escapeHtmlSafe(s.sku)}</td>
-                <td style="font-weight:600; color:#fff;">${escapeHtmlSafe(s.name)}</td>
+                <td style="font-weight:600; color:var(--text-main);">${escapeHtmlSafe(s.name)}</td>
                 <td style="font-family:var(--font-mono); font-weight:700; text-align:center;">${escapeHtmlSafe(s.stock.toString())}</td>
                 <td style="font-family:var(--font-mono); color:var(--text-dim); text-align:center;">${escapeHtmlSafe(s.min.toString())}</td>
                 <td style="font-family:var(--font-mono); color:#ef4444; font-weight:700; text-align:center;">+${escapeHtmlSafe(s.margin.toString())} unid.</td>
                 <td>
-                  <span class="badge-tag" style="background:#ef444422; border-color:#ef4444; color:#fca5a5; font-size:10.5px;">
+                  <span class="badge-tag" style="background:#fee2e2; border-color:#fca5a5; color:#991b1b; font-size:10.5px; font-weight:700;">
                     \u26A0\uFE0F REORDEN URGENTE
                   </span>
                 </td>
@@ -875,13 +875,13 @@ window.renderImportmedSection12 = function(sec) {
 
     <!-- Strategic Recommendations & MLOps -->
     <div class="glass-card" style="border:1px solid rgba(16,185,129,0.3); background:rgba(16,185,129,0.04);">
-      <h3 style="font-size:16px; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
         <span style="color:var(--accent-emerald);">\uD83D\uDCCB</span> Conclusiones Estrat\u00E9gicas y Hoja de Ruta MLOps hacia Producci\u00F3n
       </h3>
 
       <div style="display:flex; flex-direction:column; gap:10px;">
         ${sec.strategicRecommendations.map(rec => `
-          <div style="background:rgba(15,23,42,0.7); padding:12px 16px; border-radius:var(--radius-md); border-left:3px solid var(--accent-emerald); font-size:13px; color:#fff; line-height:1.5;">
+          <div style="background:var(--bg-secondary); padding:12px 16px; border-radius:var(--radius-md); border-left:3px solid var(--accent-emerald); font-size:13px; color:var(--text-main); line-height:1.5;">
             ${escapeHtmlSafe(rec)}
           </div>
         `).join('')}

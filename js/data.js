@@ -113,7 +113,7 @@ const presentationData = {
           "name": "1. Descriptivo (\u00BFQu\u00E9 pas\u00F3?)",
           "badge": "Nivel 01: El Retrovisor",
           "question": "\u00BFCu\u00E1ntos discos se nos rompieron el a\u00F1o pasado?",
-          "color": "#38bdf8",
+          "color": "#0284c7",
           "detail": "Contar cu\u00E1ntos discos est\u00E1n sanos y cu\u00E1ntos murieron en los Storage Pods (armarios de servidores). Calculamos el AFR (Annualized Failure Rate - tasa anual de fallos: qu\u00E9 porcentaje de discos muere al a\u00F1o).",
           "example": "Descubrimos que en 2019 se rompieron exactamente 165 discos del modelo Seagate 4TB (ST4000DM000), con una tasa de fallos anual hist\u00F3rica del 2.6%.",
           "tools": "Consultas SQL en BigQuery, reportes trimestrales de Backblaze y gr\u00E1ficos simples"
@@ -123,7 +123,7 @@ const presentationData = {
           "name": "2. Diagn\u00F3stico (\u00BFPor qu\u00E9 pas\u00F3?)",
           "badge": "Nivel 02: La Autopsia",
           "question": "\u00BFPor qu\u00E9 demonios se rompi\u00F3 ese disco en espec\u00EDfico?",
-          "color": "#818cf8",
+          "color": "#6366f1",
           "detail": "Investigar qu\u00E9 sensores avisaron antes del desastre. Descubrimos que el sensor SMART 187 (errores que el disco no pudo corregir) y el SMART 197 (sectores da\u00F1ados) se disparan de golpe 48 a 72 horas antes de que el motor o el cabezal revienten.",
           "example": "El sensor SMART 187 suele estar en 0. Si de repente salta a 8 o 12 errores en un solo d\u00EDa, el disco tiene un 80% de probabilidad de morir esa misma semana.",
           "tools": "An\u00E1lisis SHAP (abrir la caja negra del modelo), correlaciones estad\u00EDsticas y revisi\u00F3n f\u00EDsica"
@@ -165,13 +165,13 @@ const presentationData = {
         {
           "v": "Volumen (Much\u00EDsimos datos)",
           "stat": "~55 GB en BigQuery",
-          "color": "#38bdf8",
+          "color": "#0284c7",
           "desc": "Decenas de millones de filas de telemetr\u00EDa diaria acumulada entre 2013 y 2019. Tuvimos que usar Google BigQuery porque Excel o tu computadora colapsar\u00EDan al intentar abrirlo."
         },
         {
           "v": "Variedad (La torre de Babel)",
           "stat": "4 Fabricantes Distintos",
-          "color": "#818cf8",
+          "color": "#6366f1",
           "desc": "Seagate, Western Digital, HGST y Toshiba. Cada marca guarda los datos como le da la gana. Lo que para Seagate es temperatura en grados, para Western Digital puede ser un c\u00F3digo binario."
         },
         {
@@ -583,7 +583,7 @@ const presentationData = {
             "name": "SMART 193 Raw (Ciclos de aparcado del cabezal)",
             "importance": 0.025,
             "type": "mechanical",
-            "color": "#818cf8",
+            "color": "#6366f1",
             "explanation": "Veces que los cabezales salieron del disco a descansar en la rampa mec\u00E1nica. Mide el estr\u00E9s puramente mec\u00E1nico del motor y del actuador."
           }
         ]
@@ -609,7 +609,7 @@ const presentationData = {
             "pillar": 1,
             "name": "1. Muestreo Inteligente con el 100% de la Flota",
             "tag": "Datos",
-            "color": "#38bdf8",
+            "color": "#0284c7",
             "current": "Entrenamos con muestras de discos equilibradas a mano.",
             "production": "Alimentar al modelo con el 100% de los discos en vivo mediante t\u00E9cnicas de streaming que seleccionan en tiempo real los ejemplos m\u00E1s dif\u00EDciles (Hard Negative Mining).",
             "impact": "El modelo aprende todas las rarezas posibles y no se asusta con situaciones extra\u00F1as del mundo real."
@@ -618,7 +618,7 @@ const presentationData = {
             "pillar": 2,
             "name": "2. Redes Neuronales Temporales (LSTM y CNN 1D)",
             "tag": "Modelado",
-            "color": "#818cf8",
+            "color": "#6366f1",
             "current": "Ventanas m\u00F3viles fijas de 10 d\u00EDas calculadas con SQL.",
             "production": "Implementar redes neuronales que aprenden solas la m\u00FAsica y el ritmo del desgaste sin necesidad de programar medias ni varianzas a mano.",
             "impact": "Detecta patrones de vibraci\u00F3n microsc\u00F3picos semanas antes de que se reflejen en los contadores habituales."

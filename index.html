@@ -24,11 +24,11 @@
        ============================================================ -->
   <div class="pres-container" id="pres-container">
 
-    <!-- Top Sticky Header -->
+    <!-- Top Sticky Header (Clean Minimalist Light Design) -->
     <header class="pres-header">
       <div class="brand-wrapper">
-        <div class="brand-logo" id="brand-logo" title="Data Analytics Predictive Maintenance">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="brand-logo" id="brand-logo" title="Predictive Analytics">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
             <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
             <line x1="6" y1="6" x2="6.01" y2="6"></line>
@@ -36,51 +36,26 @@
           </svg>
         </div>
         <div class="brand-info" id="brand-info">
-          <h1 id="header-title">Backblaze Data Center | Mantenimiento Predictivo HDD</h1>
-          <span id="header-subtitle">TELEMETRÍA S.M.A.R.T. &amp; MACHINE LEARNING • FLOTA ST4000DM000</span>
+          <h1 id="header-title">Backblaze | Mantenimiento Predictivo HDD</h1>
         </div>
       </div>
 
-      <!-- Case Switcher (Backblaze vs IMPORTMED) -->
+      <!-- Segmented Pill Case Switcher -->
       <div class="case-switcher" id="case-switcher">
-        <button class="btn-case active" id="btn-case-backblaze" data-case="backblaze" title="Caso 1: Datacenter Backblaze (Discos Duros)">
+        <button class="btn-case active" id="btn-case-backblaze" data-case="backblaze" title="Caso 1: Datacenter Backblaze">
           <span class="case-icon">💽</span>
           <span class="case-text">Caso 1: Backblaze</span>
-          <span class="case-tag">Referencia HDD</span>
         </button>
-        <button class="btn-case" id="btn-case-importmed" data-case="importmed" title="Caso 2: IMPORTMED S.A. (Parque Biomédico)">
+        <button class="btn-case" id="btn-case-importmed" data-case="importmed" title="Caso 2: IMPORTMED S.A.">
           <span class="case-icon">🏥</span>
-          <span class="case-text">Caso 2: IMPORTMED S.A.</span>
-          <span class="case-tag">Parque Biomédico</span>
+          <span class="case-text">Caso 2: IMPORTMED</span>
         </button>
       </div>
 
+      <!-- Essential Header Actions -->
       <div class="header-actions">
-        <div id="header-badges" style="display:flex; align-items:center; gap:8px;">
-          <span class="badge-tag" title="Métrica campeona de evaluación">
-            <span style="width:7px; height:7px; border-radius:50%; background:#06b6d4; display:inline-block; box-shadow:0 0 10px #06b6d4;"></span>
-            XGBoost F2 = 0.528
-          </span>
-          <span class="badge-tag badge-tag-alt" title="Conjunto independiente ciego">
-            <span style="width:7px; height:7px; border-radius:50%; background:#f97316; display:inline-block; box-shadow:0 0 10px #f97316;"></span>
-            165 Fallos Reales (test_2019)
-          </span>
-        </div>
-
-        <!-- View Mode Toggle -->
-        <button class="btn-header" id="btn-toggle-mode" title="Alternar entre modo presentación interactiva y lectura continua">
-          <span id="mode-icon">📑</span>
-          <span id="mode-text">Modo Continuo</span>
-        </button>
-
-        <!-- Autoplay Button -->
-        <button class="btn-header" id="btn-autoplay" title="Iniciar reproducción automática de diapositivas">
-          <span id="autoplay-icon">▶</span>
-          <span id="autoplay-text">Auto (15s)</span>
-        </button>
-
         <!-- Glossary Drawer Button -->
-        <button class="btn-header" id="btn-open-glossary" title="Ver Glosario de Términos de IA y Mantenimiento">
+        <button class="btn-header" id="btn-open-glossary" title="Ver Glosario de Términos">
           <span>📖</span>
           <span id="glossary-btn-text">Glosario</span>
         </button>
@@ -92,36 +67,13 @@
       </div>
     </header>
 
-    <!-- Main Workspace Body -->
+    <!-- Main Workspace Body (Full Width Content Canvas) -->
     <div class="pres-body">
-
-      <!-- Sticky Sidebar Navigation -->
-      <aside class="pres-sidebar" id="pres-sidebar">
-        <div class="sidebar-title">
-          <span>Estructura del Proyecto</span>
-          <span style="font-size:10px; color:var(--accent-cyan); font-family:var(--font-mono); font-weight:700;">8 SECCIONES</span>
-        </div>
-        <nav id="nav-list" style="display:flex; flex-direction:column; gap:6px;">
-          <!-- Dynamically populated from data.js -->
-        </nav>
-
-        <div style="margin-top:auto; padding:16px 10px 6px 10px; border-top:1px solid var(--border-subtle);">
-          <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; font-family:var(--font-mono);">
-            BACKBLAZE DATASET • 2013-2019
-          </div>
-          <button class="btn-header" style="width:100%; justify-content:center; background:rgba(6,182,212,0.1); border-color:rgba(6,182,212,0.3); color:var(--accent-cyan);" id="btn-sidebar-glossary">
-            📚 Glosario Técnico
-          </button>
-        </div>
-      </aside>
-
-      <!-- Main Dynamic Content Canvas -->
       <main class="pres-main" id="pres-main">
         <div id="sections-container">
           <!-- Sections injected dynamically by app.js -->
         </div>
       </main>
-
     </div>
 
     <!-- Bottom Sticky Navigation Bar -->
@@ -139,15 +91,16 @@
         <div class="slide-dots" id="slide-dots">
           <!-- Dots dynamically rendered -->
         </div>
-        <span id="slide-counter" style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted); font-weight:700;">
+        <span id="slide-counter" style="font-family:var(--font-mono); font-size:12px; color:var(--accent-cyan); font-weight:700;">
           01 / 08
         </span>
+        <span id="slide-title-label" style="font-size:12.5px; color:var(--text-muted); font-weight:600; margin-left:8px;"></span>
       </div>
 
       <div style="display:flex; align-items:center; gap:16px;">
-        <span style="font-size:11px; color:var(--text-dim); display:inline-flex; align-items:center; gap:6px;">
-          <kbd style="background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); color:var(--text-muted);">←</kbd>
-          <kbd style="background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); color:var(--text-muted);">→</kbd>
+        <span style="font-size:11.5px; color:#1e293b; display:inline-flex; align-items:center; gap:6px; font-weight:500;">
+          <kbd style="background:#ffffff; border:1px solid #94a3b8; padding:2px 7px; border-radius:4px; font-family:var(--font-mono); color:#000000; font-weight:700;">←</kbd>
+          <kbd style="background:#ffffff; border:1px solid #94a3b8; padding:2px 7px; border-radius:4px; font-family:var(--font-mono); color:#000000; font-weight:700;">→</kbd>
           Navegar con teclado
         </span>
       </div>
