@@ -104,6 +104,16 @@ const importmedPresentationData = {
           repairCost: "$45 USD de mantenimiento programado",
           riskStatus: "EQUIPO BLINDADO - CONTINUIDAD GARANTIZADA"
         }
+      },
+      f2Equation: {
+        title: "M\u00E9trica Rectora de Decisi\u00F3n Cl\u00EDnica: F2-Score (\u03B2 = 2)",
+        latex: "F_2 = (1 + 2^2)\\cdot \\frac{\\text{Precisi\\u00F3n} \\cdot \\text{Recall}}{2^2 \\cdot \\text{Precisi\\u00F3n} + \\text{Recall}} = 5 \\cdot \\frac{\\text{Precisi\\u00F3n} \\cdot \\text{Recall}}{4 \\cdot \\text{Precisi\\u00F3n} + \\text{Recall}}",
+        predictionPurpose: "Evaluaci\u00F3n Asim\u00E9trica en Predicci\u00F3n Hospitalaria: Otorga el doble de importancia al Recall (sensibilidad) sobre la Precisi\u00F3n para penalizar severamente los Falsos Negativos (equipos biom\u00E9dicos que fallan sin alerta en salas de urgencias, costo $450+ USD vs. $45 USD de visita preventiva).",
+        apaCitation: {
+          refId: "REF-09",
+          shortCite: "(Susto et al., 2015; Alfaro Arriola, 2026a)",
+          detail: "Susto et al. (2015), IEEE Trans. Ind. Informatics, 11(3), 812\u2013820 \u2014 Evaluaci\u00F3n de clasificadores con costos asim\u00E9tricos de fallo; Alfaro Arriola (2026a) \u2014 Fase 1 (Criterio de \u00E9xito del negocio)."
+        }
       }
     },
 
@@ -266,6 +276,28 @@ const importmedPresentationData = {
           vars: "costo_total_acumulado_usd, piezas_criticas_usadas, mttr_promedio_horas",
           importance: "Se\u00F1ala equipos 'pesadilla' con alta reparabilidad y reemplazos frecuentes."
         }
+      ],
+      featureEquations: [
+        {
+          title: "1. Agregaci\u00F3n Retrospectiva en Ventanas M\u00F3viles (Anti-Leakage Estricto)",
+          latex: "\\text{Rolling}_{W}(t_i) = \\text{agg}\\Big(\\{e_k \\mid t_i - W \\le t_k < t_i\\}\\Big), \\quad W \\in \\{30,\\; 90,\\; 180\\}\\text{ d\\u00EDas}",
+          predictionPurpose: "Ingenier\u00EDa de Caracter\u00EDsticas para Predicci\u00F3n Temporal: Calcula la aceleraci\u00F3n de aver\u00EDas y el gasto acumulado en ventanas pasadas de 30, 90 y 180 d\u00EDas usando desigualdad estricta (t_k < t_i) para impedir cualquier fuga de informaci\u00F3n del futuro hacia el vector predictor X_i.",
+          apaCitation: {
+            refId: "REF-06",
+            shortCite: "(Datatonic, s. f.-b; Smith, 2021)",
+            detail: "Datatonic (s. f.-b) \u2014 Ventanas m\u00F3viles retrospectivas y prevenci\u00F3n de Data Leakage; Smith (2021) \u2014 Estructuraci\u00F3n de variables longitudinales."
+          }
+        },
+        {
+          title: "2. Etiquetado Supervisado por Horizonte Fijo N (Multiple Classifier Approach)",
+          latex: "y_i^{(N)} = \\mathbb{I}\\Big(\\exists\\, e_{\\text{correctivo}} \\in (t_i,\\; t_i + N\\text{ d\\u00EDas}]\\Big), \\quad N = 30\\text{ d\\u00EDas}",
+          predictionPurpose: "Construcci\u00F3n de la Variable Objetivo de Predicci\u00F3n (Target y_i): Convierte la serie temporal de visitas en un problema de clasificaci\u00F3n binaria supervisada donde y_i = 1 si el equipo sufre una falla correctiva en los pr\u00F3ximos N = 30 d\u00EDas posteriores al corte t_i.",
+          apaCitation: {
+            refId: "REF-09",
+            shortCite: "(Susto et al., 2015; Datatonic, s. f.-b)",
+            detail: "Susto, G. A., et al. (2015). Machine learning for predictive maintenance: A multiple classifier approach. IEEE Trans. Ind. Informatics, 11(3), 812\u2013820."
+          }
+        }
       ]
     },
 
@@ -283,27 +315,57 @@ const importmedPresentationData = {
         {
           title: "1. Función Objetivo Global Regularizada",
           latex: "\\mathcal{L}^{(t)} = \\sum_{i=1}^n l\\left(y_i, \\, \\hat{y}_i^{(t-1)} + f_t(x_i)\\right) + \\Omega(f_t)",
-          explanation: "Optimiza de forma aditiva una función de pérdida convexa $l$ con un término de regularización formal $\\Omega(f_t)$ que penaliza la complejidad estructural de cada nuevo árbol para erradicar el sobreajuste."
+          explanation: "Optimiza de forma aditiva una función de pérdida convexa $l$ con un término de regularización formal $\\Omega(f_t)$ que penaliza la complejidad estructural de cada nuevo árbol para erradicar el sobreajuste.",
+          predictionPurpose: "Entrenamiento Aditivo de Predicción (Gradient Boosting): Añade en la iteración t un nuevo árbol f_t(x_i) que corrige los errores residuales de predicción cometidos por los t-1 árboles anteriores sobre el parque de 229 equipos biomédicos.",
+          apaCitation: {
+            refId: "REF-04",
+            shortCite: "(Chen & Guestrin, 2016, Ec. 2)",
+            detail: "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. ACM SIGKDD, p. 786, Ecuación (2)."
+          }
         },
         {
           title: "2. Penalización Estructural del Árbol (Regularización L2 y L1)",
           latex: "\\Omega(f_t) = \\gamma T + \\frac{1}{2}\\lambda \\sum_{j=1}^T w_j^2 + \\alpha \\sum_{j=1}^T |w_j|",
-          explanation: "Donde $T$ es el número de hojas terminales y $w_j$ son las ponderaciones de cada hoja. Con $\\lambda = 1.0$ (regularización $L_2$), se comprime la varianza frente a datos de taller ruidosos."
+          explanation: "Donde $T$ es el número de hojas terminales y $w_j$ son las ponderaciones de cada hoja. Con $\\lambda = 1.0$ (regularización $L_2$), se comprime la varianza frente a datos de taller ruidosos.",
+          predictionPurpose: "Prevención de Sobreajuste (Overfitting Control): Restringe la creación de ramas espurias mediante γ y suaviza los puntajes de predicción en las hojas w_j con regularización L2 (λ) y L1 (α), asegurando generalización en el conjunto de prueba 2025–2026.",
+          apaCitation: {
+            refId: "REF-04",
+            shortCite: "(Chen & Guestrin, 2016, Ec. 2)",
+            detail: "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. ACM SIGKDD, p. 786, término de penalización Ω(f)."
+          }
         },
         {
           title: "3. Aproximación por Series de Taylor de Segundo Orden",
           latex: "\\tilde{\\mathcal{L}}^{(t)} \\approx \\sum_{i=1}^n \\left[ l\\left(y_i, \\hat{y}_i^{(t-1)}\\right) + g_i f_t(x_i) + \\frac{1}{2} h_i f_t^2(x_i) \\right] + \\Omega(f_t)",
-          explanation: "Permite una convergencia cuadrática ultra veloz calculando los gradientes de primer orden $g_i$ y hessianos $h_i$ en torno a las predicciones del paso anterior."
+          explanation: "Permite una convergencia cuadrática ultra veloz calculando los gradientes de primer orden $g_i$ y hessianos $h_i$ en torno a las predicciones del paso anterior.",
+          predictionPurpose: "Cálculo Analítico de Ganancia de Partición (Split Finding): Aproxima la función de pérdida mediante derivadas de 1.º y 2.º orden para determinar de forma exacta qué variable clínica (ej. dias_desde_ultimo_preventivo > 70) produce la mayor reducción de error.",
+          apaCitation: {
+            refId: "REF-04",
+            shortCite: "(Chen & Guestrin, 2016, Ec. 3)",
+            detail: "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. ACM SIGKDD, p. 786, Ecuación (3) — Expansión de Taylor."
+          }
         },
         {
           title: "4. Gradiente y Hessiano de Entropía Cruzada Binaria",
           latex: "g_i = p_i - y_i, \\quad h_i = p_i(1 - p_i) \\quad \\text{con} \\quad p_i = \\frac{1}{1 + e^{-\\hat{y}_i}}",
-          explanation: "Calcula con precisión analítica la pendiente $g_i$ y curvatura $h_i$ de la pérdida logística para cada una de las 9,389 observaciones biomédicas, donde $p_i$ es la probabilidad predicha y $y_i \\in \\{0, 1\\}$ es la etiqueta real."
+          explanation: "Calcula con precisión analítica la pendiente $g_i$ y curvatura $h_i$ de la pérdida logística para cada una de las 9,389 observaciones biomédicas, donde $p_i$ es la probabilidad predicha y $y_i \\in \\{0, 1\\}$ es la etiqueta real.",
+          predictionPurpose: "Estimación de Probabilidad Calibrada de Fallo (p_i ∈ [0, 1]): Transforma el puntaje aditivo bruto en la probabilidad clínica de que el equipo falle en 30 días, proveyendo el gradiente direccional g_i y la curvatura de incertidumbre h_i.",
+          apaCitation: {
+            refId: "REF-04",
+            shortCite: "(Chen & Guestrin, 2016; Susto et al., 2015)",
+            detail: "Chen & Guestrin (2016) — Optimización logística de segundo orden; Susto et al. (2015) — Probabilidad de fallo en horizonte fijo."
+          }
         },
         {
           title: "5. Ponderación por Asimetría de Clases (scale_pos_weight)",
           latex: "\\text{scale\\_pos\\_weight} = \\frac{\\sum_{i: y_i=0} 1}{\\sum_{i: y_i=1} 1} = \\frac{5{,}624 \\text{ sanos}}{330 \\text{ averías}} = \\mathbf{17.04}",
-          explanation: "Un Falso Negativo (dejar escapar un analizador que colapsa sin aviso) es catastrófico para un hospital. Este factor multiplica por 17.04 los gradientes de la clase avería, blindando la detección."
+          explanation: "Un Falso Negativo (dejar escapar un analizador que colapsa sin aviso) es catastrófico para un hospital. Este factor multiplica por 17.04 los gradientes de la clase avería, blindando la detección.",
+          predictionPurpose: "Corrección de Desbalance sin Submuestreo: Pondera por 17.04 el gradiente de los casos positivos (fallos reales = 5.54%) sin descartar el 94.46% de historial sano, superando la limitación del submuestreo 50-50 documentada en Backblaze.",
+          apaCitation: {
+            refId: "REF-04",
+            shortCite: "(Chen & Guestrin, 2016; Datatonic, s. f.-b)",
+            detail: "Chen & Guestrin (2016) — Parámetro scale_pos_weight en XGBoost; Datatonic (s. f.-b) — Lección aprendida sobre el submuestreo 50-50 en producción."
+          }
         }
       ]
     },
@@ -424,6 +486,16 @@ const importmedPresentationData = {
         { rank: 5, feature: "piezas_criticas_usadas", impact: "+0.247", desc: "Sustituciones pasadas de v\u00E1lvulas y motores advierten sobre estr\u00E9s acumulado en subsistemas." },
         { rank: 6, feature: "tipo_hospital_publico", impact: "+0.210", desc: "Penalizaci\u00F3n por mayor r\u00E9gimen de operaci\u00F3n continua en centros MINSA." }
       ],
+      shapEquation: {
+        title: "Ecuaci\u00F3n de Atribuci\u00F3n Aditiva de Shapley (TreeSHAP)",
+        latex: "\\hat{f}(x_i) = \\phi_0 + \\sum_{j=1}^{M} \\phi_j(f, x_i) \\quad \\text{donde} \\quad \\phi_j = \\sum_{S \\subseteq F \\setminus \\{j\\}} \\frac{|S|!(|F|-|S|-1)!}{|F|!}\\Big[f_x(S \\cup \\{j\\}) - f_x(S)\\Big]",
+        predictionPurpose: "Auditor\u00EDa Causal de Predicciones Cl\u00EDnicas: Descompone el log-odds de fallo predicho para cada equipo biom\u00E9dico en el valor base \u03C6_0 m\u00E1s la contribuci\u00F3n marginal exacta \u03C6_j de cada una de las 30 variables del Feature Store, revelando el quiebre de riesgo entre los d\u00EDas 70 y 125.",
+        apaCitation: {
+          refId: "REF-08",
+          shortCite: "(Lundberg & Lee, 2017)",
+          detail: "Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. NeurIPS 30, pp. 4765\u20134774."
+        }
+      },
       graphicsGallery: [
         {
           id: "g5",
@@ -748,7 +820,62 @@ CALCULATE(
       tooltip_context: "Demuestra a la direcci\u00F3n hospitalaria que prevenir aver\u00EDas rinde $27.54 USD por cada d\u00F3lar asignado a las cuadrillas de mantenimiento.",
       practical_analogy: "Pagar una p\u00F3liza de seguro m\u00E9dico de $100 que cubre una operaci\u00F3n imprevista de $2,754 en una cl\u00EDnica privada."
     }
-  ]
+  ],
+
+  slideReferencesMap: {
+    "importmed-portada": [
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 1 (Descubrimiento): Definici\u00F3n del problema cl\u00EDnico, costos y l\u00EDnea base", "why": "Establece el marco formal de la Fase 1 para delimitar el alcance de los 229 activos en 17 hospitales y la asimetr\u00EDa financiera." },
+      { "refId": "REF-05", "shortCite": "(Datatonic, s. f.-a)", "element": "Comparativa de los 3 Paradigmas de Mantenimiento en Electromedicina", "why": "Fundamenta la transici\u00F3n desde el mantenimiento correctivo (Run-to-Failure) y el calendario est\u00E1tico de 180 d\u00EDas hacia el mantenimiento predictivo." },
+      { "refId": "REF-09", "shortCite": "(Susto et al., 2015)", "element": "Ecuaci\u00F3n F2-Score (\u03B2 = 2) para Priorizar Recall Cl\u00EDnico", "why": "Sustenta la selecci\u00F3n de una m\u00E9trica que castiga con doble peso los Falsos Negativos en equipos cr\u00EDticos de salud." }
+    ],
+    "importmed-metodologia": [
+      { "refId": "REF-02", "shortCite": "(Alfaro Arriola, 2026b)", "element": "Los 4 Niveles de Madurez Anal\u00EDtica (Descriptivo, Diagn\u00F3stico, Predictivo y Prescriptivo)", "why": "Sustenta la progresi\u00F3n secuencial obligatoria sin saltar del an\u00E1lisis descriptivo al prescriptivo sin antes diagnosticar y predecir." },
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "El Ciclo de Vida de Data Analytics en 6 Fases", "why": "Define las actividades, responsables y entregables t\u00E9cnicos de cada una de las 6 etapas ejecutadas en IMPORTMED S.A." }
+    ],
+    "importmed-fase1-poblado": [
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 2 (Preparaci\u00F3n de Datos): Poblamiento e Integridad Relacional (>9,400 registros)", "why": "Gu\u00EDa la recolecci\u00F3n, estructuraci\u00F3n y verificaci\u00F3n de coherencia cronol\u00F3gica en la base SQLite (db.sqlite3)." },
+      { "refId": "REF-10", "shortCite": "(Smith, 2021)", "element": "Auditor\u00EDa de Calidad de Datos y Consistencia Transaccional", "why": "Respalda las reglas de integridad referencial (0 hu\u00E9rfanos) y validaci\u00F3n de tipos entre las 8 tablas operativas." },
+      { "refId": "REF-05", "shortCite": "(Datatonic, s. f.-a)", "element": "Modelado F\u00EDsico de la Degradaci\u00F3n (Curva de la Ba\u00F1era y Ley x3.2 por Omisi\u00F3n)", "why": "Inspira la inyecci\u00F3n de patrones latentes no lineales de desgaste electromec\u00E1nico y fatiga institucional." }
+    ],
+    "importmed-fase2-features": [
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Ecuaci\u00F3n 1: Ventanas M\u00F3viles Retrospectivas (30, 90, 180d) y Partici\u00F3n Out-of-Time", "why": "Adapta la t\u00E9cnica de rolling windows de Backblaze al dominio biom\u00E9dico con causalidad estricta (t_k < t_i) anti-leakage." },
+      { "refId": "REF-09", "shortCite": "(Susto et al., 2015)", "element": "Ecuaci\u00F3n 2: Etiquetado Supervisado por Horizonte Fijo N = 30 d\u00EDas", "why": "Sustenta el enfoque de M\u00FAltiples Clasificadores (MCA) para predecir fallos dentro de una ventana log\u00EDstica accionable." },
+      { "refId": "REF-10", "shortCite": "(Smith, 2021)", "element": "Diccionario del Feature Store (9,389 Snapshots \u00D7 30 Variables en 5 Bloques)", "why": "Fundamenta la codificaci\u00F3n de variables categ\u00F3ricas y la ingenier\u00EDa de indicadores financieros y de confiabilidad (MTBF/MTTR)." }
+    ],
+    "importmed-fase3-modelado": [
+      { "refId": "REF-04", "shortCite": "(Chen & Guestrin, 2016)", "element": "Las 5 Ecuaciones Fundamentales de XGBoost (\u2112^(t), \u03A9(f_t), Taylor 2.\u00BA Orden, g_i/h_i y scale_pos_weight)", "why": "Art\u00EDculo seminal de ACM SIGKDD que establece toda la formulaci\u00F3n matem\u00E1tica del clasificador campe\u00F3n de IMPORTMED." },
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Ecuaci\u00F3n 5: Uso de scale_pos_weight = 17.04 frente al Submuestreo 50-50", "why": "Aplica la lecci\u00F3n aprendida de Backblaze para evitar la inflaci\u00F3n de falsos positivos al evaluar sobre la distribuci\u00F3n real (5.54% de fallos)." }
+    ],
+    "importmed-fase3-torneo": [
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fases 3, 4 y 5: Torneo de Modelos, Validaci\u00F3n y Comunicaci\u00F3n de Resultados", "why": "Estructura la comparaci\u00F3n objetiva de algoritmos candidatos contra la l\u00EDnea base heur\u00EDstica del taller." },
+      { "refId": "REF-04", "shortCite": "(Chen & Guestrin, 2016)", "element": "XGBoost Calibrado (\u03C4 = 0.22, Recall = 52.55%, F2 = 0.4735, ROC-AUC = 0.814)", "why": "Demuestra la superioridad de Gradient Boosting regularizado sobre Regresi\u00F3n Log\u00EDstica y Random Forest." },
+      { "refId": "REF-09", "shortCite": "(Susto et al., 2015)", "element": "Gr\u00E1fica 03: Calibraci\u00F3n del Umbral de Decisi\u00F3n (\u03C4 = 0.22) y Sem\u00E1foro Cl\u00EDnico", "why": "Respalda la optimizaci\u00F3n del punto de corte probabil\u00EDstico seg\u00FAn el balance entre sensibilidad cl\u00EDnica y carga operativa." }
+    ],
+    "importmed-fase3-shap": [
+      { "refId": "REF-08", "shortCite": "(Lundberg & Lee, 2017)", "element": "Ecuaci\u00F3n TreeSHAP, Ranking Global |SHAP| y Beeswarm Summary Plot", "why": "Provee la base matem\u00E1tica de valores de Shapley para cuantificar el peso de cada variable en el modelo." },
+      { "refId": "REF-02", "shortCite": "(Alfaro Arriola, 2026b)", "element": "Articulaci\u00F3n del Nivel 02 (Diagn\u00F3stico) con el Nivel 03 (Predictivo)", "why": "Conecta la predicci\u00F3n algor\u00EDtmica con la explicaci\u00F3n causal del domo cr\u00EDtico de ruptura entre los d\u00EDas 70 y 125." }
+    ],
+    "importmed-fase3-casos-clinicos": [
+      { "refId": "REF-08", "shortCite": "(Lundberg & Lee, 2017)", "element": "Explicabilidad Local SHAP Waterfall: Caso Cr\u00EDtico Rojo (P = 68.4%) vs. Caso Verde (P = 4.2%)", "why": "Descompone individualmente las fuerzas que empujan al fallo (+) o protegen (-) a cada activo hospitalario." },
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 5 (Comunicaci\u00F3n de Resultados): Traducci\u00F3n a Lenguaje Cl\u00EDnico y Directivo", "why": "Transforma los log-odds matem\u00E1ticos en justificaciones t\u00E9cnicas auditables por jefes de taller y directores de hospital." }
+    ],
+    "importmed-fase4-star-schema": [
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 6 (Operacionalizaci\u00F3n): Integraci\u00F3n en Sistemas de Inteligencia de Negocios", "why": "Conecta las salidas del modelo predictivo con la arquitectura de consulta gerencial en Power BI Desktop." },
+      { "refId": "REF-10", "shortCite": "(Smith, 2021)", "element": "Modelo Dimensional en Estrella (9 Entidades: 5 Dimensiones, 3 Hechos, 1 Prescriptiva)", "why": "Sustenta la normalizaci\u00F3n de dimensiones, relaciones 1:N unidireccionales y medidas DAX de corte temporal." }
+    ],
+    "importmed-fase4-pbi-torre": [
+      { "refId": "REF-02", "shortCite": "(Alfaro Arriola, 2026b)", "element": "Nivel 01 (An\u00E1lisis Descriptivo): Torre de Control Ejecutiva y Mapa Territorial", "why": "Responde cuantitativamente '\u00BFQu\u00E9 pas\u00F3?' mostrando la asimetr\u00EDa del 92.4% en gasto correctivo ($214k USD) y las olas hist\u00F3ricas de aver\u00EDas." },
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 5 (Comunicaci\u00F3n Ejecutiva): Visualizaci\u00F3n para Toma de Decisiones", "why": "Sintetiza los indicadores clave de desempe\u00F1o (KPIs) para la alta gerencia de IMPORTMED y autoridades hospitalarias." }
+    ],
+    "importmed-fase4-pbi-diagnostico": [
+      { "refId": "REF-02", "shortCite": "(Alfaro Arriola, 2026b)", "element": "Nivel 02 (An\u00E1lisis Diagn\u00F3stico): Causas Ra\u00EDz, MTTR (61,635 h) e Inestabilidad Post-Reparaci\u00F3n", "why": "Responde '\u00BFPor qu\u00E9 sucedi\u00F3?' identificando el domo de costos en d\u00EDas 70\u2013125 y el impacto desproporcionado de consumibles de bajo costo." },
+      { "refId": "REF-08", "shortCite": "(Lundberg & Lee, 2017)", "element": "Integraci\u00F3n de Factores Determinantes SHAP en Power BI P\u00E1gina 2", "why": "Vincula la importancia causal de variables con la dispersi\u00F3n financiera y de tiempos de parada hospitalaria." }
+    ],
+    "importmed-fase4-pbi-prescriptiva": [
+      { "refId": "REF-02", "shortCite": "(Alfaro Arriola, 2026b)", "element": "Nivel 04 (An\u00E1lisis Prescriptivo): Consola de 41 \u00D3rdenes, 2 Brigadas y Kardex Cr\u00EDtico", "why": "Culmina la escalera anal\u00EDtica respondiendo '\u00BFQu\u00E9 acci\u00F3n tomar?' con un factor de protecci\u00F3n financiera de 27.54x ($15k salvan $415k)." },
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 6 (Operacionalizaci\u00F3n y MLOps): Monitoreo de Deriva y Reentrenamiento Semestral", "why": "Establece el ciclo continuo de auditor\u00EDa, reabastecimiento de los 5 SKUs cr\u00EDticos y actualizaci\u00F3n del modelo en producci\u00F3n." }
+    ]
+  }
 };
 
 // Global export for vanilla JS execution

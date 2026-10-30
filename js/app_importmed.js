@@ -125,6 +125,21 @@ window.renderImportmedSection1 = function(sec) {
         </div>
       </div>
     </div>
+
+    ${sec.f2Equation ? `
+      <div class="glass-card" style="margin-top:24px; border:1.5px solid #cbd5e1;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+          <h4 style="font-size:15px; font-weight:700; color:#000000; margin:0;">
+            \uD83C\uDFAF ${escapeHtmlSafe(sec.f2Equation.title)}
+          </h4>
+          ${window.renderApaCitationBadge && sec.f2Equation.apaCitation ? window.renderApaCitationBadge(sec.f2Equation.apaCitation.refId, sec.f2Equation.apaCitation.shortCite) : ''}
+        </div>
+        <div class="formula-math-render math-card-highlight">
+          ${window.renderMath ? window.renderMath(sec.f2Equation.latex, true) : escapeHtmlSafe(sec.f2Equation.latex)}
+        </div>
+        ${window.renderEquationDocBlock ? window.renderEquationDocBlock(sec.f2Equation.predictionPurpose, sec.f2Equation.apaCitation) : ''}
+      </div>
+    ` : ''}
   `;
 };
 
@@ -137,9 +152,12 @@ window.renderImportmedSection2 = function(sec) {
   return `
     <!-- Gartner 4 Levels of Analytics -->
     <div class="glass-card" style="margin-bottom:28px;">
-      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-        <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDCCA</span> Los 4 Niveles de Madurez Anal\u00EDtica Aplicados al Parque Biom\u00E9dico
-      </h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+        <h3 style="font-size:16px; color:var(--text-main); margin:0; display:flex; align-items:center; gap:8px;">
+          <span style="color:var(--accent-cyan); font-size:18px;">\uD83D\uDCCA</span> Los 4 Niveles de Madurez Anal\u00EDtica Aplicados al Parque Biom\u00E9dico
+        </h3>
+        ${window.renderApaCitationBadge ? window.renderApaCitationBadge('REF-02', '(Alfaro Arriola, 2026b)') : ''}
+      </div>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
         Transici\u00F3n integral desde el reporte pasivo de p\u00E9rdidas hasta la prescripci\u00F3n autom\u00E1tica de \u00F3rdenes de trabajo para ingenieros biom\u00E9dicos.
       </p>
@@ -162,9 +180,12 @@ window.renderImportmedSection2 = function(sec) {
 
     <!-- 6 Phases of Data Analytics Lifecycle -->
     <div class="glass-card">
-      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-        <span style="color:var(--accent-emerald); font-size:18px;">\uD83D\uDD04</span> El Ciclo de Vida de Data Analytics en 6 Fases (Prof. Roberto Alfaro Arriola)
-      </h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+        <h3 style="font-size:16px; color:var(--text-main); margin:0; display:flex; align-items:center; gap:8px;">
+          <span style="color:var(--accent-emerald); font-size:18px;">\uD83D\uDD04</span> El Ciclo de Vida de Data Analytics en 6 Fases (Prof. Roberto Alfaro Arriola)
+        </h3>
+        ${window.renderApaCitationBadge ? window.renderApaCitationBadge('REF-01', '(Alfaro Arriola, 2026a)') : ''}
+      </div>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
         Proceso iterativo de ingenier\u00EDa de datos y modelado predictivo recorrido para el parque hospitalario de IMPORTMED S.A.
       </p>
@@ -273,6 +294,23 @@ window.renderImportmedSection4 = function(sec) {
 * D\u00EDas desde \u00FAltimo preventivo y tasa de omisiones     <span style="color:var(--accent-cyan);">|           |</span>
 * Costos de repuestos y complejidad MTTR             <span style="color:var(--accent-cyan);">|           |</span>
       </div>
+
+      ${sec.featureEquations && sec.featureEquations.length ? `
+        <div style="display:flex; flex-direction:column; gap:16px; margin-top:18px;">
+          ${sec.featureEquations.map(fe => `
+            <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:var(--radius-md); padding:16px 18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                <h4 style="font-size:14.5px; font-weight:700; color:#000000; margin:0;">${escapeHtmlSafe(fe.title)}</h4>
+                ${window.renderApaCitationBadge && fe.apaCitation ? window.renderApaCitationBadge(fe.apaCitation.refId, fe.apaCitation.shortCite) : ''}
+              </div>
+              <div class="formula-math-render math-card-highlight">
+                ${window.renderMath ? window.renderMath(fe.latex, true) : escapeHtmlSafe(fe.latex)}
+              </div>
+              ${window.renderEquationDocBlock ? window.renderEquationDocBlock(fe.predictionPurpose, fe.apaCitation) : ''}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
     </div>
 
     <!-- 5 Variable Blocks -->
@@ -305,9 +343,12 @@ window.renderImportmedSection4 = function(sec) {
 window.renderImportmedSection5 = function(sec) {
   return `
     <div class="glass-card" style="margin-bottom:24px; border-left:4px solid var(--accent-emerald);">
-      <h3 style="font-size:16px; color:var(--text-main); margin-bottom:8px;">
-        🧠 ¿Cómo Aprende el Algoritmo Campeón XGBoost en Electromedicina?
-      </h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+        <h3 style="font-size:16px; color:var(--text-main); margin:0;">
+          🧠 ¿Cómo Aprende el Algoritmo Campeón XGBoost en Electromedicina?
+        </h3>
+        ${window.renderApaCitationBadge ? window.renderApaCitationBadge('REF-04', '(Chen & Guestrin, 2016)') : ''}
+      </div>
       <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
         A diferencia de modelos heurísticos o lineales, XGBoost optimiza iterativamente ensambles de árboles mediante expansiones de Taylor de segundo orden y regularización estructural para datos biomédicos ruidosos.
       </p>
@@ -315,19 +356,24 @@ window.renderImportmedSection5 = function(sec) {
 
     <div style="display:flex; flex-direction:column; gap:20px;">
       ${sec.mathFoundations.map(mf => `
-        <div class="glass-card" style="border:1px solid rgba(6,182,212,0.25);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <h4 style="font-size:15px; color:var(--text-main); font-weight:700;">${escapeHtmlSafe(mf.title)}</h4>
-            <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan); font-size:11px;">FORMULACIÓN RIGUROSA</span>
+        <div class="glass-card" style="border:1.5px solid #cbd5e1;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+            <h4 style="font-size:15px; color:var(--text-main); font-weight:700; margin:0;">${escapeHtmlSafe(mf.title)}</h4>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              ${window.renderApaCitationBadge && mf.apaCitation ? window.renderApaCitationBadge(mf.apaCitation.refId, mf.apaCitation.shortCite) : ''}
+              <span class="badge-tag" style="background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan); font-size:11px;">FORMULACIÓN RIGUROSA</span>
+            </div>
           </div>
           
           <div class="formula-math-render math-card-highlight">
             ${window.renderMath ? window.renderMath(mf.latex, true) : `<code class="math-fallback">${escapeHtmlSafe(mf.latex)}</code>`}
           </div>
 
-          <p style="font-size:13.5px; color:#000000; line-height:1.65; margin-top:10px;">
+          <p style="font-size:13.5px; color:#000000; line-height:1.65; margin-top:10px; margin-bottom:10px;">
             ${window.renderMathInText ? window.renderMathInText(mf.explanation) : escapeHtmlSafe(mf.explanation)}
           </p>
+
+          ${window.renderEquationDocBlock ? window.renderEquationDocBlock(mf.predictionPurpose, mf.apaCitation) : ''}
         </div>
       `).join('')}
     </div>
@@ -428,15 +474,33 @@ window.renderImportmedSection7 = function(sec) {
   return `
     <!-- Top Discovery Banner -->
     <div class="glass-card" style="margin-bottom:24px; border-left:4px solid #ef4444; background:rgba(239,68,68,0.06);">
-      <h3 style="font-size:16px; color:#ef4444; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-        \uD83D\uDCA5 El Gran Descubrimiento Cient\u00EDfico: Quiebre Catastr\u00F3fico entre D\u00EDas 70 y 125
-      </h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+        <h3 style="font-size:16px; color:#ef4444; margin:0; display:flex; align-items:center; gap:8px;">
+          \uD83D\uDCA5 El Gran Descubrimiento Cient\u00EDfico: Quiebre Catastr\u00F3fico entre D\u00EDas 70 y 125
+        </h3>
+        ${window.renderApaCitationBadge ? window.renderApaCitationBadge('REF-08', '(Lundberg & Lee, 2017)') : ''}
+      </div>
       <p style="font-size:13px; color:var(--text-main); line-height:1.55;">
         Los fabricantes biom\u00E9dicos estipulan en sus manuales rutinas preventivas semestrales (cada 180 d\u00EDas).
         El an\u00E1lisis de dependencia parcial SHAP demostr\u00F3 que el estr\u00E9s cl\u00EDnico hospitalario en Nicaragua no resiste 180 d\u00EDas:
         <strong>el punto de colapso ocurre bruscamente entre los d\u00EDas 70 y 125</strong>, dejando a las salas de emergencia desprotegidas durante 2 meses completos.
       </p>
     </div>
+
+    ${sec.shapEquation ? `
+      <div class="glass-card" style="margin-bottom:24px; border:1.5px solid #cbd5e1;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+          <h4 style="font-size:15px; font-weight:700; color:#000000; margin:0;">
+            \uD83E\uDDEE ${escapeHtmlSafe(sec.shapEquation.title)}
+          </h4>
+          ${window.renderApaCitationBadge && sec.shapEquation.apaCitation ? window.renderApaCitationBadge(sec.shapEquation.apaCitation.refId, sec.shapEquation.apaCitation.shortCite) : ''}
+        </div>
+        <div class="formula-math-render math-card-highlight">
+          ${window.renderMath ? window.renderMath(sec.shapEquation.latex, true) : escapeHtmlSafe(sec.shapEquation.latex)}
+        </div>
+        ${window.renderEquationDocBlock ? window.renderEquationDocBlock(sec.shapEquation.predictionPurpose, sec.shapEquation.apaCitation) : ''}
+      </div>
+    ` : ''}
 
     <!-- SHAP Importance Ranking -->
     <div class="glass-card" style="margin-bottom:28px;">

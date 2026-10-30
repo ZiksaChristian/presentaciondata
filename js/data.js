@@ -376,6 +376,12 @@ const presentationData = {
           "badge": "Compensación de Clases",
           "color": "#f97316",
           "latex": "\\text{scale\\_pos\\_weight} = \\frac{\\sum_{i: y_i=0} 1}{\\sum_{i: y_i=1} 1} = \\frac{88{,}790 \\text{ sanos}}{5{,}210 \\text{ rotos}} = \\mathbf{17.04}",
+          "predictionPurpose": "Compensación Asimétrica en Predicción: Escala por 17.04 el gradiente de error de los discos en fallo durante el entrenamiento de XGBoost, evitando el submuestreo 50-50 que en producción disparó las falsas alarmas a 1,105.",
+          "apaCitation": {
+            "refId": "REF-04",
+            "shortCite": "(Chen & Guestrin, 2016; Datatonic, s. f.-b)",
+            "detail": "Chen & Guestrin (2016), KDD '16, pp. 785–794 — Ponderación de gradiente para clases desbalanceadas; Datatonic (s. f.-b) — Análisis empírico del desbalance en Backblaze."
+          },
           "plainExplanation": "Imagina que en un salón hay 17 alumnos tranquilos y 1 alumno revoltoso. Si el profesor no presta atención, tenderá a ignorar al revoltoso porque es minoría. Esta fórmula le dice a la Inteligencia Artificial: 'Oye, sé que por cada disco moribundo hay 17 discos sanos, pero te voy a castigar 17 veces más duro si dejas pasar un disco que estaba a punto de morir'.",
           "variables": [
             { "name": "Casos Negativos (88,790)", "desc": "Días en los que los discos operaron normalmente sin romperse (la inmensa mayoría)." },
@@ -389,6 +395,12 @@ const presentationData = {
           "badge": "Evaluación del Negocio",
           "color": "#06b6d4",
           "latex": "F_2 = (1 + 2^2) \\times \\frac{\\text{Precisión} \\times \\text{Recall}}{2^2 \\times \\text{Precisión} + \\text{Recall}} = 5 \\times \\frac{\\text{Precisión} \\times \\text{Recall}}{4 \\times \\text{Precisión} + \\text{Recall}}",
+          "predictionPurpose": "Selección del Modelo y Calibración de Umbral: Evalúa la calidad predictiva ponderando el Recall con el doble de importancia (β = 2) que la Precisión, penalizando severamente los Falsos Negativos (discos que mueren sin aviso en el Storage Pod).",
+          "apaCitation": {
+            "refId": "REF-09",
+            "shortCite": "(Susto et al., 2015; Alfaro Arriola, 2026a)",
+            "detail": "Susto et al. (2015), IEEE Trans. Ind. Informatics, 11(3), 812–820 — Métricas asimétricas en mantenimiento predictivo; Alfaro Arriola (2026a) — Fase 1 y 4 del Ciclo de Vida."
+          },
           "plainExplanation": "El F2-Score es el promedio ponderado entre la Precisión (cuántas alarmas fueron reales) y el Recall (capacidad de cazar todos los fallos), pero le da exactamente el DOBLE de importancia al Recall. ¿Por qué? Porque en un centro de datos es preferible que el técnico revise por gusto un disco sano (falsa alarma de $45 USD) a que un disco reviente por sorpresa, destruya el RAID y se pierdan terabytes de clientes ($450 USD + catástrofe de reputación).",
           "variables": [
             { "name": "Recall (Sensibilidad)", "desc": "¿De los 165 discos que se rompieron, a cuántos atrapamos antes de que murieran? (Peso x2)" },
@@ -402,11 +414,55 @@ const presentationData = {
           "badge": "Equilibrio Matemático",
           "color": "#10b981",
           "latex": "\\mathcal{L}_{\\text{Obj}}(\\Theta) = \\underbrace{\\sum_{i=1}^{n} l\\left(y_i, \\, \\hat{y}_i\\right)}_{\\text{Pérdida (Errores cometidos)}} + \\underbrace{\\sum_{k=1}^{K} \\Omega(f_k)}_{\\text{Complejidad (Castigo por memorizar)}}",
+          "predictionPurpose": "Motor de Aprendizaje Supervisado Aditivo: Minimiza simultáneamente el error de predicción logística sobre la probabilidad de fallo del disco y la complejidad estructural de los árboles (regularización L1/L2) para generalizar fuera de muestra (test_2019).",
+          "apaCitation": {
+            "refId": "REF-04",
+            "shortCite": "(Chen & Guestrin, 2016, Ec. 2)",
+            "detail": "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. ACM SIGKDD, pp. 785–794, Sección 2.1 (Regularized Learning Objective)."
+          },
           "plainExplanation": "XGBoost no es magia negra: es una balanza matemática inteligente. Por un lado intenta cometer el mínimo de errores posibles prediciendo fallos (Pérdida). Pero por el otro, tiene un freno de mano automático que le impide volverse loco y memorizarse los datos de memoria (Complejidad). Gracias a este freno, el modelo no se engaña a sí mismo en el laboratorio y funciona de maravilla con discos nuevos en el centro de datos real.",
           "variables": [
             { "name": "Pérdida (Loss)", "desc": "Mide cuántos fallos no predijo o cuántas falsas alarmas dio en los datos de entrenamiento." },
             { "name": "Complejidad (Regularización L1/L2)", "desc": "Pena a los árboles que tienen demasiadas ramas o ramas demasiado enredadas." },
             { "name": "Equilibrio", "desc": "El modelo busca el punto dulce donde aprende los patrones reales de degradación sin aprenderse el ruido." }
+          ]
+        },
+        {
+          "id": "formula-rolling-smart",
+          "title": "D) Ventanas Móviles S.M.A.R.T. (10 Días) y Horizonte N",
+          "badge": "Feature Engineering Temporal",
+          "color": "#0284c7",
+          "latex": "\\mu_{10\\text{d}}(\\text{SMART}_k) = \\frac{1}{10}\\sum_{j=0}^{9} x_{k, t-j} \\quad ; \\quad \\sigma_{10\\text{d}}(\\text{SMART}_k) = \\sqrt{\\frac{1}{10}\\sum_{j=0}^{9}\\big(x_{k, t-j} - \\mu_{10\\text{d}}\\big)^2}",
+          "predictionPurpose": "Captura de Velocidad de Degradación Electromecánica: Transforma lecturas S.M.A.R.T. estáticas (atributos 5, 187, 188, 197, 198) en tendencias dinámicas de los últimos 10 días para alimentar los clasificadores de horizonte N ∈ {1, 2, 7, 30} días.",
+          "apaCitation": {
+            "refId": "REF-06",
+            "shortCite": "(Datatonic, s. f.-b; Susto et al., 2015)",
+            "detail": "Datatonic (s. f.-b) — Rolling windows de 10 días sobre telemetría S.M.A.R.T.; Susto et al. (2015) — Enfoque de múltiples clasificadores por horizonte N."
+          },
+          "plainExplanation": "Una sola lectura de un sensor no revela si el deterioro es antiguo o si acaba de acelerarse ayer. Al calcular la media μ y la desviación estándar σ de los últimos 10 días, el modelo detecta saltos abruptos en sectores dañados antes del colapso físico.",
+          "variables": [
+            { "name": "Media Móvil 10d ($\\mu_{10\\text{d}}$)", "desc": "Nivel promedio reciente del contador S.M.A.R.T. suavizando ruido transitorio." },
+            { "name": "Volatilidad 10d ($\\sigma_{10\\text{d}}$)", "desc": "Mide la aceleración o inestabilidad brusca del atributo en los 10 días previos al fallo." },
+            { "name": "Horizonte $N \\in \\{1, 2, 7, 30\\}$", "desc": "Ventana de anticipación en días para emitir la orden preventiva de migración de datos." }
+          ]
+        },
+        {
+          "id": "formula-shapley",
+          "title": "E) Atribución Aditiva de Shapley (Explicabilidad SHAP)",
+          "badge": "Auditoría XAI (Caja Blanca)",
+          "color": "#7c3aed",
+          "latex": "\\phi_j(f, \\mathbf{x}) = \\sum_{S \\subseteq F \\setminus \\{j\\}} \\frac{|S|!\\big(|F| - |S| - 1\\big)!}{|F|!} \\Big[f_x(S \\cup \\{j\\}) - f_x(S)\\Big]",
+          "predictionPurpose": "Explicabilidad Global y Local de Predicciones: Descompone la probabilidad de fallo predicha por XGBoost en la contribución marginal exacta φ_j de cada sensor S.M.A.R.T., revelando el efecto multiplicador de la edad del disco (SMART 9 Raw).",
+          "apaCitation": {
+            "refId": "REF-08",
+            "shortCite": "(Lundberg & Lee, 2017; Datatonic, s. f.-b)",
+            "detail": "Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. NeurIPS 30, pp. 4765–4774 (Ecuación de valores de Shapley)."
+          },
+          "plainExplanation": "Basada en la teoría de juegos cooperativos de Lloyd Shapley, esta ecuación evalúa todas las coaliciones posibles de sensores S.M.A.R.T. para determinar con justicia matemática cuántos puntos de riesgo aportó cada sensor al diagnóstico de un disco duro específico.",
+          "variables": [
+            { "name": "Contribución Marginal $\\phi_j$", "desc": "Impacto exacto del sensor $j$ (ej. SMART 187 o SMART 9) sobre el log-odds de fallo." },
+            { "name": "Subconjuntos $S \\subseteq F \\setminus \\{j\\}$", "desc": "Coaliciones de las demás variables evaluadas con y sin el sensor $j$." },
+            { "name": "Propiedad de Aditividad", "desc": "La suma de todos los $\\phi_j$ más el valor base reproduce exactamente la predicción de XGBoost." }
           ]
         }
       ],
@@ -790,12 +846,202 @@ const presentationData = {
       "practical_analogy": "Un edificio de 60 departamentos: si en un departamento hay una fuga de agua, lo evacuas antes de que inunde a los otros 59 departamentos vecinos.",
       "icon": "server"
     }
-  ]
+  ],
+  "apaReferences": [
+    {
+      "id": "REF-01",
+      "shortCite": "(Alfaro Arriola, 2026a)",
+      "authors": "Alfaro Arriola, R.",
+      "year": "2026a",
+      "title": "Ciclo de vida de Data Analytics: Desglose detallado de las 6 fases del proceso anal\u00EDtico",
+      "source": "Universidad Nacional de Ingenier\u00EDa (UNI) \u2013 Ingenier\u00EDa en Computaci\u00F3n.",
+      "fullApaHtml": "Alfaro Arriola, R. (2026a). <em>Ciclo de vida de Data Analytics: Desglose detallado de las 6 fases del proceso anal\u00EDtico</em>. Universidad Nacional de Ingenier\u00EDa (UNI) \u2013 Ingenier\u00EDa en Computaci\u00F3n.",
+      "domain": "Metodolog\u00EDa Rectora: Las 6 Fases del Ciclo de Vida (Descubrimiento, Preparaci\u00F3n, Planificaci\u00F3n, Construcci\u00F3n, Comunicaci\u00F3n y Operacionalizaci\u00F3n).",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 04 (Las 6 fases del pipeline GCP/BigQuery) y M\u00F3dulo 08 (Operacionalizaci\u00F3n MLOps).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 02 (Marco Metodol\u00F3gico de 6 Fases), M\u00F3dulos 03 a 12 (Trazabilidad fase por fase)."
+      ]
+    },
+    {
+      "id": "REF-02",
+      "shortCite": "(Alfaro Arriola, 2026b)",
+      "authors": "Alfaro Arriola, R.",
+      "year": "2026b",
+      "title": "Tipos de an\u00E1lisis: Descriptivo, diagn\u00F3stico, predictivo y prescriptivo",
+      "source": "Universidad Nacional de Ingenier\u00EDa (UNI) \u2013 Ingenier\u00EDa en Computaci\u00F3n.",
+      "fullApaHtml": "Alfaro Arriola, R. (2026b). <em>Tipos de an\u00E1lisis: Descriptivo, diagn\u00F3stico, predictivo y prescriptivo</em>. Universidad Nacional de Ingenier\u00EDa (UNI) \u2013 Ingenier\u00EDa en Computaci\u00F3n.",
+      "domain": "Madurez Anal\u00EDtica: Los 4 niveles (\u00BFQu\u00E9 pas\u00F3?, \u00BFPor qu\u00E9 pas\u00F3?, \u00BFQu\u00E9 pasara?, \u00BFQu\u00E9 acci\u00F3n tomar?) y la regla de no prescribir sin diagnosticar y predecir.",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 02 (Escalera de Madurez Anal\u00EDtica y Regla de Oro interactiva).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 02 (4 Niveles en Parque Biom\u00E9dico), M\u00F3dulos 10, 11 y 12 (Tableros Descriptivo, Diagn\u00F3stico y Prescriptivo en Power BI)."
+      ]
+    },
+    {
+      "id": "REF-03",
+      "shortCite": "(Backblaze, s. f.)",
+      "authors": "Backblaze",
+      "year": "s. f.",
+      "title": "Hard drive data and stats [Conjunto de datos]",
+      "source": "https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data",
+      "url": "https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data",
+      "fullApaHtml": "Backblaze. (s. f.). <em>Hard drive data and stats</em> [Conjunto de datos]. <a href=\"https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data</a>",
+      "domain": "Fuente Primaria de Datos S.M.A.R.T.: Telemetr\u00EDa diaria (2013\u20132019, ~55 GB en BigQuery, modelo Seagate ST4000DM000, 165 fallos en test_2019).",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 01 (KPIs de flota y Storage Pods), M\u00F3dulo 03 (Explosi\u00F3n de 40 a 62 atributos S.M.A.R.T., 124 columnas)."
+      ]
+    },
+    {
+      "id": "REF-04",
+      "shortCite": "(Chen & Guestrin, 2016)",
+      "authors": "Chen, T., y Guestrin, C.",
+      "year": "2016",
+      "title": "XGBoost: A scalable tree boosting system",
+      "source": "Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (pp. 785\u2013794). ACM.",
+      "url": "https://doi.org/10.1145/2939672.2939785",
+      "fullApaHtml": "Chen, T., y Guestrin, C. (2016). XGBoost: A scalable tree boosting system. En <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em> (pp. 785\u2013794). ACM. <a href=\"https://doi.org/10.1145/2939672.2939785\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1145/2939672.2939785</a>",
+      "domain": "Formulaci\u00F3n Matem\u00E1tica del Modelo Predictivo: Funci\u00F3n objetivo regularizada L^(t), penalizaci\u00F3n L1/L2 \u03A9(f_t), expansi\u00F3n de Taylor de 2.\u00BA orden, gradientes g_i, hessianos h_i y scale_pos_weight = 17.04.",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 04 (Fase 4 entrenamiento XGBoost) y M\u00F3dulo 06 (Ecuaciones A y C de XGBoost y Torneo de Modelos).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 05 (Las 5 Ecuaciones Fundamentales de XGBoost) y M\u00F3dulo 06 (Campe\u00F3n del Torneo con F2 = 0.4735)."
+      ]
+    },
+    {
+      "id": "REF-05",
+      "shortCite": "(Datatonic, s. f.-a)",
+      "authors": "Datatonic",
+      "year": "s. f.-a",
+      "title": "Machine learning for predictive maintenance \u2013 Part 1",
+      "source": "https://datatonic.com/insights/machine-learning-predictive-maintenance/",
+      "url": "https://datatonic.com/insights/machine-learning-predictive-maintenance/",
+      "fullApaHtml": "Datatonic. (s. f.-a). <em>Machine learning for predictive maintenance \u2013 Part 1</em>. <a href=\"https://datatonic.com/insights/machine-learning-predictive-maintenance/\" target=\"_blank\" rel=\"noopener noreferrer\">https://datatonic.com/insights/machine-learning-predictive-maintenance/</a>",
+      "domain": "Paradigmas de Mantenimiento y Heur\u00EDstica S.M.A.R.T.: Comparativa Run-to-Failure vs. Preventivo vs. Predictivo y selecci\u00F3n de los 5 atributos S.M.A.R.T. cr\u00EDticos (5, 187, 188, 197, 198).",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 01 (Tabla 1 de estrategias de mantenimiento y simulador Reactivo vs. Predictivo) y M\u00F3dulo 03.",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 01 (Paralelismo con los 3 paradigmas en electromedicina hospitalaria)."
+      ]
+    },
+    {
+      "id": "REF-06",
+      "shortCite": "(Datatonic, s. f.-b)",
+      "authors": "Datatonic",
+      "year": "s. f.-b",
+      "title": "Machine learning for predictive maintenance \u2013 Part 2",
+      "source": "https://datatonic.com/insights/machine-learning-predictive-maintenance-hard-drive-failure/",
+      "url": "https://datatonic.com/insights/machine-learning-predictive-maintenance-hard-drive-failure/",
+      "fullApaHtml": "Datatonic. (s. f.-b). <em>Machine learning for predictive maintenance \u2013 Part 2</em>. <a href=\"https://datatonic.com/insights/machine-learning-predictive-maintenance-hard-drive-failure/\" target=\"_blank\" rel=\"noopener noreferrer\">https://datatonic.com/insights/machine-learning-predictive-maintenance-hard-drive-failure/</a>",
+      "domain": "Ingenier\u00EDa Temporal y Evaluaci\u00F3n Experimental: Ventanas m\u00F3viles de 10 d\u00EDas, horizontes N = 1, 2, 7, 30 d\u00EDas, partici\u00F3n Out-of-Time y an\u00E1lisis del submuestreo 50-50.",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 05 (Ventanas m\u00F3viles de 10 d\u00EDas), M\u00F3dulo 06 (Ecuaci\u00F3n D y Tabla 7 del Torneo en test_2019).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 04 (Ventanas m\u00F3viles retrospectivas 30/90/180d y divisi\u00F3n temporal ciega)."
+      ]
+    },
+    {
+      "id": "REF-07",
+      "shortCite": "(Datatonic, s. f.-c)",
+      "authors": "Datatonic",
+      "year": "s. f.-c",
+      "title": "predictive-maintenance-demo [C\u00F3digo fuente]",
+      "source": "GitHub. https://github.com/teamdatatonic/predictive-maintenance-demo",
+      "url": "https://github.com/teamdatatonic/predictive-maintenance-demo",
+      "fullApaHtml": "Datatonic. (s. f.-c). <em>predictive-maintenance-demo</em> [C\u00F3digo fuente]. GitHub. <a href=\"https://github.com/teamdatatonic/predictive-maintenance-demo\" target=\"_blank\" rel=\"noopener noreferrer\">https://github.com/teamdatatonic/predictive-maintenance-demo</a>",
+      "domain": "Arquitectura de Scripts y Pipeline Cloud: Scripts upload_to_gcs.sh, GCStoBigQuery.py, create_ml_datasets.py y notebooks de entrenamiento e interpretabilidad.",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 04 (Visor de scripts Bash/SQL/Python de las 6 fases) y M\u00F3dulo 05 (Pipeline de ingesta a BigQuery)."
+      ]
+    },
+    {
+      "id": "REF-08",
+      "shortCite": "(Lundberg & Lee, 2017)",
+      "authors": "Lundberg, S. M., y Lee, S.-I.",
+      "year": "2017",
+      "title": "A unified approach to interpreting model predictions",
+      "source": "Advances in Neural Information Processing Systems (Vol. 30, pp. 4765\u20134774). Curran Associates.",
+      "fullApaHtml": "Lundberg, S. M., y Lee, S.-I. (2017). A unified approach to interpreting model predictions. En I. Guyon et al. (Eds.), <em>Advances in Neural Information Processing Systems</em> (Vol. 30, pp. 4765\u20134774). Curran Associates.",
+      "domain": "Explicabilidad XAI (Valores SHAP): Teor\u00EDa de juegos cooperativos de Shapley (\u03C6_j), importancia global |SHAP|, gr\u00E1ficos de dependencia parcial y cascadas locales (Waterfall).",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 06 (Ecuaci\u00F3n E de Shapley) y M\u00F3dulo 07 (Figura 2 de importancia SHAP y hallazgo de SMART 9 Raw).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 07 (Domo cr\u00EDtico en d\u00EDas 70\u2013125 con SHAP Dependence) y M\u00F3dulo 08 (Auditor\u00EDa forense Waterfall de casos cl\u00EDnicos Rojo vs. Verde)."
+      ]
+    },
+    {
+      "id": "REF-09",
+      "shortCite": "(Susto et al., 2015)",
+      "authors": "Susto, G. A., Schirru, A., Pampuri, S., McLoone, S., y Beghi, A.",
+      "year": "2015",
+      "title": "Machine learning for predictive maintenance: A multiple classifier approach",
+      "source": "IEEE Transactions on Industrial Informatics, 11(3), 812\u2013820.",
+      "url": "https://doi.org/10.1109/TII.2014.2349359",
+      "fullApaHtml": "Susto, G. A., Schirru, A., Pampuri, S., McLoone, S., y Beghi, A. (2015). Machine learning for predictive maintenance: A multiple classifier approach. <em>IEEE Transactions on Industrial Informatics, 11</em>(3), 812\u2013820. <a href=\"https://doi.org/10.1109/TII.2014.2349359\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1109/TII.2014.2349359</a>",
+      "domain": "Enfoque de M\u00FAltiples Clasificadores (Multiple Classifier Approach): Formulaci\u00F3n del mantenimiento predictivo como clasificaci\u00F3n binaria supervisada con horizonte fijo N en lugar de regresi\u00F3n RUL continua.",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 04 y M\u00F3dulo 06 (8 clasificadores para horizontes N = 1, 2, 7 y 30 d\u00EDas y m\u00E9trica F2-Score).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 04 (Etiquetado supervisado a horizonte N = 30 d\u00EDas) y M\u00F3dulo 06 (Calibraci\u00F3n del umbral \u03C4 = 0.22)."
+      ]
+    },
+    {
+      "id": "REF-10",
+      "shortCite": "(Smith, 2021)",
+      "authors": "Smith, B.",
+      "year": "2021",
+      "title": "An\u00E1lisis de datos: Gu\u00EDa completa para principiantes",
+      "source": "Edici\u00F3n independiente.",
+      "fullApaHtml": "Smith, B. (2021). <em>An\u00E1lisis de datos: Gu\u00EDa completa para principiantes</em>.",
+      "domain": "Fundamentos de Preparaci\u00F3n y Estructuraci\u00F3n de Datos: Limpieza de valores nulos (>30%), integridad referencial, eliminaci\u00F3n de variables est\u00E1ticas y dise\u00F1o dimensional.",
+      "matches": [
+        "Caso 1 (Backblaze): M\u00F3dulo 03 (4 V del Big Data y depuraci\u00F3n de columnas nulas) y M\u00F3dulo 05 (Filtrado de nulos en BigQuery).",
+        "Caso 2 (IMPORTMED): M\u00F3dulo 03 (Integridad relacional en SQLite) y M\u00F3dulo 09 (Estructuraci\u00F3n del Star Schema en Power BI)."
+      ]
+    }
+  ],
+  "slideReferencesMap": {
+    "portada-contexto": [
+      { "refId": "REF-03", "shortCite": "(Backblaze, s. f.)", "element": "KPIs de Flota y Telemetr\u00EDa (~55 GB, ST4000DM000, 165 fallos)", "why": "Provee el dataset p\u00FAblico oficial de los centros de datos de Backblaze entre 2013 y 2019." },
+      { "refId": "REF-05", "shortCite": "(Datatonic, s. f.-a)", "element": "Tabla 1: Las 3 Estrategias de Mantenimiento y Simulador Operativo", "why": "Fundamenta la transici\u00F3n desde Run-to-Failure y Preventivo por calendario hacia el Mantenimiento Predictivo basado en condici\u00F3n." },
+      { "refId": "REF-04", "shortCite": "(Chen & Guestrin, 2016)", "element": "Motor Predictivo XGBoost y scale_pos_weight = 17.04", "why": "Sustenta el algoritmo de Gradient Boosting utilizado para anticipar fallos con ventana de maniobra." }
+    ],
+    "niveles-madurez": [
+      { "refId": "REF-02", "shortCite": "(Alfaro Arriola, 2026b)", "element": "Escalera de 4 Niveles de Madurez Anal\u00EDtica y Regla de Oro", "why": "Establece la taxonom\u00EDa Descriptivo \u2192 Diagn\u00F3stico \u2192 Predictivo \u2192 Prescriptivo y la prohibici\u00F3n metodol\u00F3gica de prescribir sin diagnosticar y predecir." },
+      { "refId": "REF-08", "shortCite": "(Lundberg & Lee, 2017)", "element": "Nivel 02 (Diagn\u00F3stico con SHAP)", "why": "Respalda el uso de valores de Shapley para explicar f\u00EDsicamente por qu\u00E9 ocurre el fallo antes de automatizar decisiones." },
+      { "refId": "REF-09", "shortCite": "(Susto et al., 2015)", "element": "Nivel 03 (Predictivo por Horizontes N = 1, 2, 7, 30 d\u00EDas)", "why": "Justifica la formulaci\u00F3n de clasificadores binarios supervisados por horizonte temporal." }
+    ],
+    "big-data-desafio": [
+      { "refId": "REF-03", "shortCite": "(Backblaze, s. f.)", "element": "Figura 1: Explosi\u00F3n Dimensional S.M.A.R.T. (de 80 a 124 columnas)", "why": "Documenta la evoluci\u00F3n hist\u00F3rica de 40 a 62 atributos S.M.A.R.T. (valores Raw y Normalized) entre 2013 y 2018." },
+      { "refId": "REF-05", "shortCite": "(Datatonic, s. f.-a)", "element": "Limitaci\u00F3n Cognitiva Humana vs. Aprendizaje Autom\u00E1tico Multivariado", "why": "Demuestra por qu\u00E9 las reglas manuales sobre sensores aislados colapsan ante relaciones no lineales en 124 dimensiones." },
+      { "refId": "REF-10", "shortCite": "(Smith, 2021)", "element": "Las 4 V del Big Data y Depuraci\u00F3n de Veracidad (>30% Nulos)", "why": "Sustenta los criterios de perfilado, limpieza de datos faltantes y homogeneizaci\u00F3n por modelo." }
+    ],
+    "ciclo-de-vida": [
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Estructura Completa de las 6 Fases del Ciclo de Vida de Data Analytics", "why": "Marco metodol\u00F3gico que articula desde la Fase 1 (Descubrimiento) hasta la Fase 6 (Operacionalizaci\u00F3n)." },
+      { "refId": "REF-07", "shortCite": "(Datatonic, s. f.-c)", "element": "Scripts del Pipeline (upload_to_gcs.sh, create_ml_datasets.py, train_xgboost)", "why": "Repositorio oficial de c\u00F3digo fuente que implementa la ingesta en GCS/BigQuery y los notebooks de modelado." },
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Fase 3: Partici\u00F3n Temporal Out-of-Time (2013\u20132018 vs. Test 2019)", "why": "Garantiza la evaluaci\u00F3n a ciegas sin fuga de informaci\u00F3n del futuro (Data Leakage)." }
+    ],
+    "ingenieria-datos": [
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Ventanas M\u00F3viles de 10 D\u00EDas (Media, Varianza, M\u00EDn, M\u00E1x, Delta)", "why": "Define la ingenier\u00EDa de caracter\u00EDsticas temporales para capturar la velocidad de degradaci\u00F3n de los 5 atributos S.M.A.R.T. cr\u00EDticos." },
+      { "refId": "REF-07", "shortCite": "(Datatonic, s. f.-c)", "element": "Diagrama de Flujo del Pipeline SQL/BigQuery (5 Etapas)", "why": "Proporciona la arquitectura de transformaci\u00F3n desde CSVs crudos hasta la matriz lista para XGBoost." },
+      { "refId": "REF-10", "shortCite": "(Smith, 2021)", "element": "Etapa 03: Filtrado de Nulos (<30%) y Consistencia de Esquema", "why": "Respalda el preprocesamiento y saneamiento de variables antes del c\u00E1lculo de agregaciones." }
+    ],
+    "torneo-algoritmos": [
+      { "refId": "REF-04", "shortCite": "(Chen & Guestrin, 2016)", "element": "Ecuaciones A y C: scale_pos_weight (17.04) y Funci\u00F3n Objetivo Regularizada de XGBoost", "why": "Art\u00EDculo fundacional de XGBoost que define el objetivo aditivo con regularizaci\u00F3n L1/L2 y ponderaci\u00F3n de clases desbalanceadas." },
+      { "refId": "REF-09", "shortCite": "(Susto et al., 2015)", "element": "Ecuaci\u00F3n B (F2-Score) y Clasificadores por Horizonte N", "why": "Sustenta la evaluaci\u00F3n asim\u00E9trica donde un Falso Negativo es 10 veces m\u00E1s costoso que una falsa alarma." },
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Ecuaci\u00F3n D (Ventanas 10d) y Tabla 7: Resultados del Torneo en Test 2019 (165 Fallos)", "why": "Documenta las m\u00E9tricas comparativas entre Run-to-Failure, Heur\u00EDstica Backblaze, Random Forest y XGBoost." },
+      { "refId": "REF-08", "shortCite": "(Lundberg & Lee, 2017)", "element": "Ecuaci\u00F3n E: Atribuci\u00F3n Aditiva de Shapley (\u03C6_j)", "why": "Fundamento matem\u00E1tico de teor\u00EDa de juegos cooperativos para auditar las decisiones del modelo." }
+    ],
+    "interpretabilidad-shap": [
+      { "refId": "REF-08", "shortCite": "(Lundberg & Lee, 2017)", "element": "Figura 2: Importancia Global SHAP y Descomposici\u00F3n de Variables", "why": "Introduce el marco TreeSHAP para cuantificar la contribuci\u00F3n marginal exacta de cada sensor S.M.A.R.T." },
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Hallazgo Cr\u00EDtico: SMART 9 Raw (Horas de Encendido) en 3.er Lugar", "why": "Demuestra emp\u00EDricamente que XGBoost utiliza la edad acumulada del disco como multiplicador de gravedad de los errores de lectura." },
+      { "refId": "REF-05", "shortCite": "(Datatonic, s. f.-a)", "element": "Sensores Heur\u00EDsticos (SMART 187, 197, 5, 188, 198)", "why": "Explica el significado electromec\u00E1nico de cada contador S.M.A.R.T. en los platos y cabezales del disco." }
+    ],
+    "conclusiones-mlops": [
+      { "refId": "REF-01", "shortCite": "(Alfaro Arriola, 2026a)", "element": "Fase 6 (Operacionalizaci\u00F3n): Monitoreo Continuo, Data Drift y Reentrenamiento", "why": "Define los requisitos de gobierno, actualizaci\u00F3n programada e integraci\u00F3n operativa para sostener el valor del modelo." },
+      { "refId": "REF-06", "shortCite": "(Datatonic, s. f.-b)", "element": "Tabla 8: Los 4 Pilares de Evoluci\u00F3n a Producci\u00F3n (Fase 2)", "why": "Establece la hoja de ruta para superar el submuestreo 50-50, incorporar redes temporales (LSTM/CNN) y automatizar el pipeline." }
+    ]
+  }
 }
 ;
 
 if (typeof window !== 'undefined') {
   window.presentationData = presentationData;
   window.backblazePresentationData = presentationData;
+  window.apaReferences = presentationData.apaReferences;
+  window.slideReferencesMap = presentationData.slideReferencesMap;
 }
 

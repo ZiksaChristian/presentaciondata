@@ -54,6 +54,12 @@
 
       <!-- Essential Header Actions -->
       <div class="header-actions">
+        <!-- APA 7 References Drawer Button -->
+        <button class="btn-header" id="btn-open-references" title="Ver Referencias Bibliográficas (APA 7)">
+          <span>📚</span>
+          <span id="references-btn-text">Referencias APA 7</span>
+        </button>
+
         <!-- Glossary Drawer Button -->
         <button class="btn-header" id="btn-open-glossary" title="Ver Glosario de Términos">
           <span>📖</span>
@@ -127,6 +133,27 @@
 
     <div class="drawer-list" id="glossary-list">
       <!-- Terms rendered dynamically -->
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       SLIDE-OUT APA 7 BIBLIOGRAPHY & REFERENCES DRAWER
+       ============================================================ -->
+  <aside class="glossary-drawer" id="apa-references-drawer">
+    <div class="drawer-header">
+      <h3>
+        <span>📚</span> Catálogo Bibliográfico y Sustento Científico (APA 7)
+      </h3>
+      <button class="drawer-close-btn" id="references-close-btn" title="Cerrar Referencias">&times;</button>
+    </div>
+
+    <div class="drawer-search-box">
+      <input type="text" id="references-search" class="drawer-input"
+             placeholder="🔍 Filtrar por autor, año, ecuación o tema (ej. Chen, SHAP, Susto, Alfaro)...">
+    </div>
+
+    <div class="drawer-list" id="references-list">
+      <!-- APA 7 References rendered dynamically -->
     </div>
   </aside>
 

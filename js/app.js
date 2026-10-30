@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   buildNavigation();
   buildGlossary();
+  buildApaReferences();
   renderSections();
   setupEventListeners();
   setupKeyboardShortcuts();
@@ -183,6 +184,10 @@ window.toggleGlossary = function(show, targetTerm = null) {
   const backdrop = document.getElementById('drawer-backdrop');
   
   if (show) {
+    // Close APA references drawer if open
+    const refDrawer = document.getElementById('apa-references-drawer');
+    if (refDrawer) refDrawer.classList.remove('open');
+
     drawer.classList.add('open');
     backdrop.classList.add('open');
     
@@ -203,8 +208,223 @@ window.toggleGlossary = function(show, targetTerm = null) {
     }
   } else {
     drawer.classList.remove('open');
-    backdrop.classList.remove('open');
+    const refDrawer = document.getElementById('apa-references-drawer');
+    if (!refDrawer || !refDrawer.classList.contains('open')) {
+      backdrop.classList.remove('open');
+    }
   }
+};
+
+/**
+ * ===================================================================
+ * APA 7 BIBLIOGRAPHY & SCIENTIFIC MATCH SYSTEM
+ * ===================================================================
+ */
+function getMasterApaReferences() {
+  if (typeof window !== 'undefined' && window.apaReferences) {
+    return window.apaReferences;
+  }
+  if (typeof presentationData !== 'undefined' && presentationData.apaReferences) {
+    return presentationData.apaReferences;
+  }
+  return [];
+}
+
+function getSlideReferencesForSection(sectionId) {
+  const activeData = getActiveData();
+  if (activeData && activeData.slideReferencesMap && activeData.slideReferencesMap[sectionId]) {
+    return activeData.slideReferencesMap[sectionId];
+  }
+  if (typeof window !== 'undefined' && window.importmedPresentationData && window.importmedPresentationData.slideReferencesMap && window.importmedPresentationData.slideReferencesMap[sectionId]) {
+    return window.importmedPresentationData.slideReferencesMap[sectionId];
+  }
+  if (typeof presentationData !== 'undefined' && presentationData.slideReferencesMap && presentationData.slideReferencesMap[sectionId]) {
+    return presentationData.slideReferencesMap[sectionId];
+  }
+  return [];
+}
+
+function buildApaReferences() {
+  const refList = document.getElementById('references-list');
+  const searchInput = document.getElementById('references-search');
+  const btnText = document.getElementById('references-btn-text');
+  const refs = getMasterApaReferences();
+
+  if (btnText) {
+    btnText.textContent = `Referencias APA 7 (${refs.length})`;
+  }
+  if (!refList) return;
+
+  function renderRefs(filter = '') {
+    refList.innerHTML = '';
+    const q = filter.trim().toLowerCase();
+
+    const filtered = refs.filter(r => {
+      return r.id.toLowerCase().includes(q) ||
+             r.shortCite.toLowerCase().includes(q) ||
+             r.authors.toLowerCase().includes(q) ||
+             r.title.toLowerCase().includes(q) ||
+             r.domain.toLowerCase().includes(q) ||
+             (r.matches && r.matches.some(m => m.toLowerCase().includes(q)));
+    });
+
+    if (filtered.length === 0) {
+      refList.innerHTML = `
+        <div style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:13px;">
+          No se encontraron referencias para "<strong>${escapeHtml(filter)}</strong>"
+        </div>
+      `;
+      return;
+    }
+
+    filtered.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'term-card apa-ref-card';
+      card.id = `apa-ref-card-${r.id}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <span class="apa-ref-id-badge">${escapeHtml(r.id)} • ${escapeHtml(r.shortCite)}</span>
+          <span style="font-size:11px; font-family:var(--font-mono); color:#047857; font-weight:700; background:#dcfce7; padding:2px 8px; border-radius:4px; border:1px solid #86efac;">
+            Formato Oficial APA 7
+          </span>
+        </div>
+
+        <div class="apa-hanging-indent">
+          ${r.fullApaHtml}
+        </div>
+
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-left:3.5px solid #0284c7; padding:8px 12px; border-radius:6px; margin-top:10px; font-size:12px; color:#000000; line-height:1.45;">
+          <strong style="color:#0369a1;">🎯 Propósito Científico en el Proyecto:</strong> ${escapeHtml(r.domain)}
+        </div>
+
+        ${r.matches && r.matches.length ? `
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:3.5px solid #059669; padding:8px 12px; border-radius:6px; margin-top:8px; font-size:11.5px; color:#000000; line-height:1.45;">
+            <strong style="color:#047857; display:block; margin-bottom:4px;">🔗 Trazabilidad / Dónde hace Match en las Presentaciones:</strong>
+            <ul style="margin:0; padding-left:16px; display:flex; flex-direction:column; gap:3px;">
+              ${r.matches.map(m => `<li>${escapeHtml(m)}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      `;
+      refList.appendChild(card);
+    });
+  }
+
+  if (searchInput) {
+    searchInput.oninput = (e) => renderRefs(e.target.value);
+  }
+  renderRefs();
+}
+
+window.toggleApaReferences = function(show, targetRefId = null) {
+  const drawer = document.getElementById('apa-references-drawer');
+  const glossaryDrawer = document.getElementById('glossary-drawer');
+  const backdrop = document.getElementById('drawer-backdrop');
+  if (!drawer || !backdrop) return;
+
+  if (show) {
+    if (glossaryDrawer) glossaryDrawer.classList.remove('open');
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+
+    if (targetRefId) {
+      const searchInput = document.getElementById('references-search');
+      if (searchInput) searchInput.value = '';
+      buildApaReferences();
+
+      setTimeout(() => {
+        const refEl = document.getElementById(`apa-ref-card-${targetRefId}`);
+        if (refEl) {
+          refEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          refEl.classList.add('highlighted');
+          setTimeout(() => refEl.classList.remove('highlighted'), 2600);
+        }
+      }, 220);
+    }
+  } else {
+    drawer.classList.remove('open');
+    if (!glossaryDrawer || !glossaryDrawer.classList.contains('open')) {
+      backdrop.classList.remove('open');
+    }
+  }
+};
+
+window.renderApaCitationBadge = function(refId, shortCite, extraLabel = '') {
+  if (!shortCite) return '';
+  const safeId = escapeHtml(refId || 'REF-01');
+  const safeCite = escapeHtml(shortCite);
+  const safeExtra = extraLabel ? ` <span style="opacity:0.85; font-weight:500;">• ${escapeHtml(extraLabel)}</span>` : '';
+  return `<button type="button" class="apa-cite-badge" onclick="event.stopPropagation(); window.toggleApaReferences(true, '${safeId}')" title="Haz clic para abrir la referencia bibliográfica completa en APA 7">📖 ${safeCite}${safeExtra}</button>`;
+};
+
+window.renderEquationDocBlock = function(predictionPurpose, apaCitation) {
+  if (!predictionPurpose && !apaCitation) return '';
+  const refId = (apaCitation && apaCitation.refId) ? apaCitation.refId : 'REF-04';
+  const shortCite = (apaCitation && apaCitation.shortCite) ? apaCitation.shortCite : '(Chen & Guestrin, 2016)';
+  const detail = (apaCitation && apaCitation.detail) ? apaCitation.detail : '';
+
+  return `
+    <div class="equation-doc-match-grid">
+      <div class="eq-doc-purpose-col">
+        <div class="eq-doc-col-title" style="color:#047857;">
+          <span>🎯</span> ¿Para qué sirve esta ecuación en la Predicción? (Match Analítico)
+        </div>
+        <div class="eq-doc-col-body">
+          ${window.renderMathInText ? window.renderMathInText(escapeHtml(predictionPurpose || '')) : escapeHtml(predictionPurpose || '')}
+        </div>
+      </div>
+
+      <div class="eq-doc-reference-col">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+          <span class="eq-doc-col-title" style="color:#0369a1; margin-bottom:0;">
+            <span>📚</span> Referencia Científica (APA 7)
+          </span>
+          ${window.renderApaCitationBadge(refId, shortCite)}
+        </div>
+        <div class="eq-doc-col-body" style="font-size:12px;">
+          ${escapeHtml(detail)}
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.renderSlideReferencesStrip = function(sectionId) {
+  const slideRefs = getSlideReferencesForSection(sectionId);
+  if (!slideRefs || slideRefs.length === 0) return '';
+
+  return `
+    <div class="slide-references-card" id="slide-refs-${escapeHtml(sectionId)}">
+      <div class="slide-references-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📚</span>
+          <h4 style="font-size:14.5px; font-weight:800; color:#000000; margin:0;">
+            Sustento Metodológico y Referencias de esta Diapositiva (Norma APA 7)
+          </h4>
+        </div>
+        <button type="button" class="btn-header" style="font-size:11.5px; padding:4px 10px;" onclick="window.toggleApaReferences(true)">
+          Ver Bibliografía Completa (10 Fuentes) →
+        </button>
+      </div>
+
+      <div class="slide-references-grid">
+        ${slideRefs.map(sr => `
+          <div class="slide-ref-match-item" onclick="window.toggleApaReferences(true, '${escapeHtml(sr.refId)}')" title="Haz clic para abrir la ficha APA 7 de ${escapeHtml(sr.shortCite)}">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+              <span class="apa-cite-badge" style="pointer-events:none;">📖 ${escapeHtml(sr.shortCite)}</span>
+              <span style="font-size:10.5px; font-family:var(--font-mono); color:#0369a1; font-weight:700;">[${escapeHtml(sr.refId)}]</span>
+            </div>
+            <div style="font-size:12.5px; font-weight:700; color:#000000; margin-bottom:4px;">
+              🔗 Match: ${escapeHtml(sr.element)}
+            </div>
+            <div style="font-size:12px; color:#1e293b; line-height:1.45; font-weight:500;">
+              ${escapeHtml(sr.why)}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 };
 
 /**
@@ -256,15 +476,24 @@ function renderSections() {
     secEl.dataset.index = idx;
 
     const numDisplay = sec.index < 10 ? `0${sec.index}` : `${sec.index}`;
+    const slideRefs = getSlideReferencesForSection(sec.id);
 
     // Header Box
     let innerHTML = `
       <div class="section-header-box">
-        <div class="section-top-meta">
-          <span class="badge-tag">M\u00F3dulo ${numDisplay}</span>
-          <span style="font-size:12px; font-family:var(--font-mono); color:var(--accent-cyan); font-weight:600;">
-            ${sec.badge || 'An\u00E1lisis T\u00E9cnico'}
-          </span>
+        <div class="section-top-meta" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="badge-tag">M\u00F3dulo ${numDisplay}</span>
+            <span style="font-size:12px; font-family:var(--font-mono); color:var(--accent-cyan); font-weight:600;">
+              ${sec.badge || 'An\u00E1lisis T\u00E9cnico'}
+            </span>
+          </div>
+          ${slideRefs && slideRefs.length ? `
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <span style="font-size:11px; color:#000000; font-weight:700; font-family:var(--font-mono);">Citas APA 7:</span>
+              ${slideRefs.map(sr => window.renderApaCitationBadge(sr.refId, sr.shortCite)).join('')}
+            </div>
+          ` : ''}
         </div>
         <h2 class="section-title">${sec.title}</h2>
         <div class="section-tagline">${sec.tagline || ''}</div>
@@ -340,6 +569,11 @@ function renderSections() {
 
       default:
         innerHTML += `<div class="glass-card"><p>Contenido del m\u00F3dulo...</p></div>`;
+    }
+
+    // Append APA 7 Slide References & Scientific Match Strip to every slide
+    if (typeof window.renderSlideReferencesStrip === 'function') {
+      innerHTML += window.renderSlideReferencesStrip(sec.id);
     }
 
     secEl.innerHTML = innerHTML;
@@ -957,11 +1191,26 @@ function renderSection5(sec) {
       </div>
     </div>
 
-    <!-- Detalle de las 5 Agregaciones en Ventana de 10 D\u00EDas -->
+      <!-- Detalle de las 5 Agregaciones en Ventana de 10 D\u00EDas -->
     <div class="glass-card" style="margin-top:24px;">
-      <h3 style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:12px;">
-        \u23F1\uFE0F Funciones de Ventanas M\u00F3viles de 10 D\u00EDas (${w.windowSize})
-      </h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:700; color:var(--text-main); margin:0;">
+          \u23F1\uFE0F Funciones de Ventanas M\u00F3viles de 10 D\u00EDas (${w.windowSize})
+        </h3>
+        ${window.renderApaCitationBadge ? window.renderApaCitationBadge('REF-06', '(Datatonic, s. f.-b; Susto et al., 2015)') : ''}
+      </div>
+
+      <!-- Ecuación Documentada de Ventana Móvil S.M.A.R.T. -->
+      <div style="margin-bottom:16px;">
+        <div class="formula-math-render math-card-highlight">
+          ${window.renderMath ? window.renderMath("\\mu_{10\\text{d}}(\\text{SMART}_k) = \\frac{1}{10}\\sum_{j=0}^{9} x_{k, t-j} \\quad ; \\quad \\sigma_{10\\text{d}}(\\text{SMART}_k) = \\sqrt{\\frac{1}{10}\\sum_{j=0}^{9}\\big(x_{k, t-j} - \\mu_{10\\text{d}}\\big)^2}", true) : ''}
+        </div>
+        ${window.renderEquationDocBlock ? window.renderEquationDocBlock(
+          "Ingeniería de Características para Predicción de Fallo: Captura la velocidad y volatilidad del desgaste en los 5 sensores S.M.A.R.T. críticos (5, 187, 188, 197, 198) durante los últimos 10 días para alimentar los clasificadores de horizonte N ∈ {1, 2, 7, 30} días.",
+          { refId: "REF-06", shortCite: "(Datatonic, s. f.-b; Susto et al., 2015)", detail: "Datatonic (s. f.-b) — Rolling windows de 10 días en BigQuery; Susto et al. (2015) — Clasificadores supervisados por horizonte N." }
+        ) : ''}
+      </div>
+
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;">
         ${w.aggregations.map(a => `
           <div style="background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:12px 14px;">
@@ -1017,15 +1266,15 @@ window.selectFlowStep = function(stepNum) {
  */
 function renderSection6(sec) {
   return `
-    <!-- Trilog\u00EDa Matem\u00E1tica Interactiva (F\u00F3rmulas A, B y C) -->
+    <!-- F\u00F3rmulas Matem\u00E1ticas Interactivas Documentadas (APA 7) -->
     <div class="formula-showcase-container">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
         <div>
           <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">
-            <span>\uD83D\uDCD0</span> Las 3 F\u00F3rmulas Matem\u00E1ticas que Hacen Funcionar el Modelo
+            <span>\uD83D\uDCD0</span> Las 5 F\u00F3rmulas Matem\u00E1ticas del Modelo y su Sustento Cient\u00EDfico (APA 7)
           </h3>
           <p style="font-size:12px; color:var(--text-muted);">
-            Haz clic en cada pesta\u00F1a para entender qu\u00E9 hace cada f\u00F3rmula explicada en cristiano:
+            Haz clic en cada pesta\u00F1a para explorar la ecuaci\u00F3n, su prop\u00F3sito exacto en la predicci\u00F3n y su referencia cient\u00EDfica:
           </p>
         </div>
       </div>
@@ -1119,6 +1368,8 @@ window.selectFormulaTab = function(idx) {
         <div class="formula-math-render math-card-highlight">
           ${window.renderMath ? window.renderMath(form.latex, true) : escapeHtml(form.latex)}
         </div>
+
+        ${window.renderEquationDocBlock ? window.renderEquationDocBlock(form.predictionPurpose, form.apaCitation) : ''}
 
         <div class="formula-analogy-box">
           <strong style="color:var(--accent-orange); display:block; margin-bottom:4px;">💡 En Cristiano / Explicación Cotidiana:</strong>
@@ -1292,6 +1543,23 @@ window.highlightWinnerXGB = function() {
 function renderSection7(sec) {
   const f = sec.figure2;
   return `
+    <!-- Ecuaci\u00F3n Documentada de Atribuci\u00F3n SHAP (Lundberg & Lee, 2017) -->
+    <div class="glass-card" style="margin-bottom:22px; border:1.5px solid #cbd5e1;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <h4 style="font-size:15px; font-weight:700; color:#000000; margin:0;">
+          \uD83E\uDDEE Fundamento Matem\u00E1tico de Explicabilidad: Atribuci\u00F3n Aditiva de Shapley (SHAP)
+        </h4>
+        ${window.renderApaCitationBadge ? window.renderApaCitationBadge('REF-08', '(Lundberg & Lee, 2017)') : ''}
+      </div>
+      <div class="formula-math-render math-card-highlight">
+        ${window.renderMath ? window.renderMath("\\phi_j(f, \\mathbf{x}) = \\sum_{S \\subseteq F \\setminus \\{j\\}} \\frac{|S|!\\big(|F| - |S| - 1\\big)!}{|F|!} \\Big[f_x(S \\cup \\{j\\}) - f_x(S)\\Big]", true) : ''}
+      </div>
+      ${window.renderEquationDocBlock ? window.renderEquationDocBlock(
+        "Auditoría Transparente de Predicción: Descompone la probabilidad de fallo de cada unidad Seagate ST4000DM000 en la contribución marginal exacta φ_j de cada sensor S.M.A.R.T., demostrando que las horas de encendido (SMART 9 Raw) multiplican la letalidad de los errores físicos.",
+        { refId: "REF-08", shortCite: "(Lundberg & Lee, 2017; Datatonic, s. f.-b)", detail: "Lundberg & Lee (2017), NeurIPS 30, pp. 4765–4774 — Valores de Shapley en modelos de árboles; Datatonic (s. f.-b) — Model_Interpretability.ipynb." }
+      ) : ''}
+    </div>
+
     <div class="shap-chart-wrapper">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
         <div>
@@ -1675,6 +1943,13 @@ function setupEventListeners() {
 
   // Autoplay removed as requested
 
+  // APA 7 References Drawer Buttons
+  const btnReferences = document.getElementById('btn-open-references');
+  if (btnReferences) btnReferences.addEventListener('click', () => window.toggleApaReferences(true));
+
+  const referencesClose = document.getElementById('references-close-btn');
+  if (referencesClose) referencesClose.addEventListener('click', () => window.toggleApaReferences(false));
+
   // Glossary Drawer Buttons (header + sidebar)
   const btnGlossary = document.getElementById('btn-open-glossary');
   if (btnGlossary) btnGlossary.addEventListener('click', () => toggleGlossary(true));
@@ -1686,7 +1961,10 @@ function setupEventListeners() {
   if (drawerClose) drawerClose.addEventListener('click', () => toggleGlossary(false));
 
   const drawerBackdrop = document.getElementById('drawer-backdrop');
-  if (drawerBackdrop) drawerBackdrop.addEventListener('click', () => toggleGlossary(false));
+  if (drawerBackdrop) drawerBackdrop.addEventListener('click', () => {
+    toggleGlossary(false);
+    window.toggleApaReferences(false);
+  });
 
   // Fullscreen Button
   const btnFullscreen = document.getElementById('btn-fullscreen');

@@ -3017,3 +3017,154 @@ h1, h2, h3, h4, h5, h6 {
   font-style: italic;
   font-weight: 500;
 }
+
+/* ===================================================================
+   APA 7 CITATION BADGES, EQUATION MATCH BLOCKS & SLIDE BIBLIOGRAPHY
+   =================================================================== */
+.apa-cite-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e0f2fe;
+  border: 1.5px solid #0284c7;
+  color: #0369a1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.apa-cite-badge:hover {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25);
+  transform: translateY(-1px);
+}
+
+.apa-ref-id-badge {
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  color: #0369a1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.apa-hanging-indent {
+  padding-left: 28px;
+  text-indent: -28px;
+  font-size: 13px;
+  color: #000000;
+  line-height: 1.6;
+  font-weight: 500;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 12px;
+}
+
+.apa-hanging-indent a {
+  color: #0284c7;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* Equation Purpose & Scientific Reference Match Block */
+.equation-doc-match-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 14px;
+  margin-top: 12px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 860px) {
+  .equation-doc-match-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.eq-doc-purpose-col {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-left: 4px solid #059669;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.eq-doc-reference-col {
+  background: #f0f9ff;
+  border: 1.5px solid #7dd3fc;
+  border-left: 4px solid #0284c7;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.eq-doc-col-title {
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eq-doc-col-body {
+  font-size: 12.5px;
+  color: #000000;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Slide Footer Bibliography & Match Card */
+.slide-references-card {
+  margin-top: 32px;
+  background: #ffffff;
+  border: 1.5px solid #94a3b8;
+  border-top: 4px solid #0284c7;
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.slide-references-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.slide-references-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.slide-ref-match-item {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slide-ref-match-item:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);
+  transform: translateY(-2px);
+}
+
